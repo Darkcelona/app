@@ -34,7 +34,7 @@ export const isAdmin = () => !!user && user.rol === 'admin';
 /** Cerrar sesión: borra el código y toda la información guardada en este dispositivo. */
 export function clearSession() {
   user = null;
-  events = []; historyP1 = { items: [], total: 0 }; myHistory = []; bares = []; cumples = [];
+  events = []; historyP1 = { items: [], total: 0 }; myHistory = []; bares = []; cumples = []; grupos = [];
   Object.values(KEYS).forEach(k => { if (k !== KEYS.apiUrl) lsRemove(k); });
 }
 
@@ -58,6 +58,10 @@ export function setMyHistory(list) { myHistory = list; lsSet(KEYS.myHistory, JSO
 let cumples = lsGetJson(KEYS.cumples, []);
 export const getCumples = () => cumples;
 export function setCumples(list) { cumples = list; lsSet(KEYS.cumples, JSON.stringify(list)); }
+
+let grupos = lsGetJson(KEYS.grupos, []);
+export const getGrupos = () => grupos;
+export function setGrupos(list) { grupos = list; lsSet(KEYS.grupos, JSON.stringify(list)); }
 
 let bares = lsGetJson(KEYS.bares, []);
 export const getBares = () => bares;

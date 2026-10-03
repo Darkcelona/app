@@ -4,7 +4,7 @@
 //    dispositivo y se envía al Excel. Sin red, la cola espera y se reintenta: nada se pierde.
 //  · Al leer, el Excel manda y encima se re-aplican los cambios aún pendientes, para que la pantalla no "salte".
 import { KEYS, SYNC_TIMEOUT_MS, HISTORY_PAGE } from './config.js';
-import { lsGet, lsSet, lsRemove, getCode, getApiUrl, setUser, setEvents, setBares, setCumples, getHistoryP1, setHistoryP1, setMyHistory } from './store.js';
+import { lsGet, lsSet, lsRemove, getCode, getApiUrl, setUser, setEvents, setBares, setCumples, setGrupos, getHistoryP1, setHistoryP1, setMyHistory } from './store.js';
 import { assignIds, eventKey, addAttendee, removeAttendee } from './utils.js';
 
 export class AuthError extends Error {}
@@ -129,6 +129,7 @@ export function syncNow() {
     setUser(json.user);
     setEvents(overlay(assignIds(json.data.quedadas), readOutbox(), json.user));
     setBares(json.data.bares);
+    if (Array.isArray(json.data.grupos)) setGrupos(json.data.grupos);
     if (Array.isArray(json.data.cumples)) setCumples(json.data.cumples);   // un script antiguo no los manda: se conservan los que había
     return { sent: box.length, rejected, archived: json.archived || 0 };
   })().finally(() => { busy = null; });

@@ -11,6 +11,7 @@ export const KEYS = {
   myHistory: 'darkcelona-mis-eventos',      // los eventos pasados en los que aparezco (para el perfil)
   bares: 'darkcelona-bares',
   cumples: 'darkcelona-cumples',
+  grupos: 'darkcelona-grupos',
   cumpleOculto: 'darkcelona-cumple-oculto',   // día (AAAA-MM-DD) en que se cerró el aviso de cumpleaños
   code: 'darkcelona-code',
   user: 'darkcelona-user',

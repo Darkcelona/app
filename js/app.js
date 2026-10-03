@@ -6,6 +6,7 @@ import {
 import { filters, renderEvents, renderBares, renderHistorial, toggleAttendees, fillTypeSelect } from './render.js';
 import { renderProfile, profileState } from './profile.js';
 import { renderCumples, renderCumpleBanner, ocultarAvisoHoy } from './cumples.js';
+import { renderGrupos } from './grupos.js';
 import { loadAdmin, adminAction, adminCreate, setLogFilter } from './admin.js';
 import {
   AuthError, isConfigured, isLoggedIn, syncNow, loadHistoryPage, loadMyHistory, pendingCount,
@@ -61,6 +62,7 @@ function selectTab(name) {
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
   if (name === 'bares') renderBares();
   if (name === 'cumples') renderCumples();
+  if (name === 'grupos') renderGrupos();
   if (name === 'historial') { renderHistorial(); ensureHistory(); }
   if (name === 'perfil') { renderProfile(false); ensureMyHistory(); }
   if (name === 'admin') loadAdmin();
@@ -89,6 +91,7 @@ function renderAll() {
   renderEvents();
   renderCumpleBanner();
   if (currentTab === 'cumples') renderCumples();
+  if (currentTab === 'grupos') renderGrupos();
   if (currentTab === 'bares') renderBares();
   if (currentTab === 'historial') renderHistorial();
   if (currentTab === 'perfil') renderProfile(true);
