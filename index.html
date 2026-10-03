@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#cc1a1a">
+<meta name="description" content="Gestión de quedadas del grupo Darkcelona">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Darkcelona">
+<meta name="referrer" content="no-referrer">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Darkcelona 🤘 Quedadas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header>
+  <div class="header-logo">
+    <span class="logo-skull" aria-hidden="true">🤘</span>
+    <h1 class="logo-text">Darkcelona</h1>
+  </div>
+  <div class="header-actions">
+    <button class="btn-icon" id="user-chip" data-action="goto-profile" title="Mi perfil" hidden></button>
+  </div>
+</header>
+
+<nav class="nav-tabs" role="tablist">
+  <button class="nav-tab active" role="tab" aria-selected="true" data-tab="quedadas">🎸 Quedadas</button>
+  <button class="nav-tab" role="tab" aria-selected="false" data-tab="bares">🍺 Bares</button>
+  <button class="nav-tab" role="tab" aria-selected="false" data-tab="cumples">🎂 Cumples</button>
+  <button class="nav-tab" role="tab" aria-selected="false" data-tab="historial">📜 Historial</button>
+  <button class="nav-tab" role="tab" aria-selected="false" data-tab="perfil">👤 Perfil</button>
+  <button class="nav-tab" role="tab" aria-selected="false" data-tab="admin" id="tab-admin" hidden>🛠️ Admin</button>
+</nav>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<!-- ACCESO: se muestra cuando no hay sesión -->
+<div id="access-screen" class="access-screen" hidden>
+  <div class="access-card">
+    <div class="access-skull" aria-hidden="true">🤘</div>
+    <h2 class="access-title">Darkcelona</h2>
+    <p class="access-msg" id="access-msg"></p>
+    <form id="access-form" class="access-form">
+      <label class="form-label" for="access-code">¿Tienes un código de acceso?</label>
+      <input class="form-input" id="access-code" type="password" placeholder="Pégalo aquí" autocomplete="off">
+      <button class="btn-primary" type="submit">Entrar</button>
+    </form>
+    <p class="access-hint">Tu acceso es un enlace personal que te manda un admin del grupo. Si no lo tienes o ha dejado de funcionar, pídelo en el grupo.</p>
+  </div>
+</div>
+
+<main>
+
+  <!-- QUEDADAS -->
+  <section id="panel-quedadas" class="panel active" role="tabpanel">
+    <div id="cumple-banner" class="cumple-banner" hidden></div>
+
+    <div id="sync-bar" class="sync-bar" hidden>
+      <span class="sync-icon" id="sync-icon">🔄</span>
+      <span class="sync-text" id="sync-text"></span>
+      <button class="sync-btn" data-action="sync">↻ Reintentar</button>
+    </div>
+
+    <div id="pwa-banner" class="pwa-install-banner" hidden>
+      <span aria-hidden="true">📲</span>
+      <div class="pwa-text">Instala Darkcelona como app en tu dispositivo</div>
+      <button class="btn-allow btn-allow-red" data-action="install">Instalar</button>
+      <button class="btn-dismiss" data-action="pwa-dismiss" aria-label="Cerrar">✕</button>
+    </div>
+
+    <div class="stats-row" id="stats-row"></div>
+
+    <div class="filters" id="filters"></div>
+    <input class="filter-search" type="search" id="search-input" placeholder="🔍 Buscar eventos, sitios, asistentes..." aria-label="Buscar eventos">
+
+    <div id="events-list"></div>
+  </section>
+
+  <!-- BARES -->
+  <section id="panel-bares" class="panel" role="tabpanel">
+    <div id="bares-list"></div>
+  </section>
+
+  <!-- CUMPLEAÑOS -->
+  <section id="panel-cumples" class="panel" role="tabpanel">
+    <div id="cumples-view"></div>
+  </section>
+
+  <!-- HISTORIAL -->
+  <section id="panel-historial" class="panel" role="tabpanel">
+    <div class="filters">
+      <input class="filter-search" type="search" id="hist-search" placeholder="🔍 Buscar historial..." aria-label="Buscar en el historial">
+    </div>
+    <div id="historial-list"></div>
+  </section>
+
+  <!-- PERFIL -->
+  <section id="panel-perfil" class="panel" role="tabpanel">
+    <div id="profile-view"></div>
+  </section>
+
+  <!-- ADMIN -->
+  <section id="panel-admin" class="panel" role="tabpanel">
+    <div id="admin-view"></div>
+  </section>
+
+</main>
+
+<button class="fab" data-action="new-event" title="Añadir evento" aria-label="Añadir evento" hidden>＋</button>
+
+<!-- MODAL: AÑADIR / EDITAR EVENTO -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title-text">
+    <div class="modal-title">
+      <span id="modal-title-text">Nueva Quedada</span>
+      <button class="modal-close" data-action="close-modal" aria-label="Cerrar">✕</button>
+    </div>
+    <form id="event-form" class="form-grid" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="f-fecha">Fecha *</label>
+        <input class="form-input" type="date" id="f-fecha" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="f-fecha-fin">Fecha fin (opcional)</label>
+        <input class="form-input" type="date" id="f-fecha-fin">
+      </div>
+      <div class="form-group full">
+        <label class="form-label" for="f-tipo">Tipo *</label>
+        <select class="form-input" id="f-tipo"></select>
+      </div>
+      <div class="form-group full">
+        <label class="form-label" for="f-evento">Evento *</label>
+        <input class="form-input" type="text" id="f-evento" placeholder="Nombre del evento o banda" required>
+      </div>
+      <div class="form-group full">
+        <label class="form-label" for="f-sitio">Sitio / Hora</label>
+        <input class="form-input" type="text" id="f-sitio" placeholder="Sala, dirección, hora...">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="f-propone">Quién propone</label>
+        <input class="form-input" type="text" id="f-propone" placeholder="Tu nick o nombre">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="f-previa">Previa (sitio/hora)</label>
+        <input class="form-input" type="text" id="f-previa" placeholder="Bar, hora...">
+      </div>
+      <div class="form-group full">
+        <label class="form-label" for="f-asistentes">Asistentes (uno por línea)</label>
+        <textarea class="form-input" id="f-asistentes" placeholder="Omar&#10;Luismi&#10;Berta..."></textarea>
+      </div>
+      <div class="form-group full form-media">
+        <label class="form-label" for="f-imagen">🖼️ Imagen del evento</label>
+        <input class="form-input" type="url" id="f-imagen" placeholder="https://... URL de imagen del concierto o cartel">
+        <div class="img-preview-wrap" id="img-preview-wrap">
+          <img id="img-preview" alt="Vista previa">
+          <div class="img-err" id="img-err">⚠️ No se puede cargar la imagen</div>
+        </div>
+      </div>
+      <div class="form-group full">
+        <label class="form-label" for="f-youtube">▶️ Vídeo YouTube del grupo / evento</label>
+        <input class="form-input" type="url" id="f-youtube" placeholder="https://www.youtube.com/watch?v=...">
+      </div>
+      <div class="form-group full">
+        <label class="form-label" for="f-tickets">🎟️ Enlace para comprar entradas</label>
+        <input class="form-input" type="url" id="f-tickets" placeholder="https://ticketmaster.es/... o cualquier web de venta">
+      </div>
+    </form>
+    <div class="form-actions">
+      <button class="btn-secondary" data-action="close-modal">Cancelar</button>
+      <button class="btn-primary" data-action="save-event">🤘 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

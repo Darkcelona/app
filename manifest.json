@@ -1,0 +1,18 @@
+{
+  "name": "Darkcelona Quedadas",
+  "short_name": "Darkcelona",
+  "description": "Gestión de quedadas del grupo Darkcelona",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#cc1a1a",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ],
+  "categories": ["lifestyle", "social"],
+  "lang": "es"
+}
