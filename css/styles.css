@@ -42,18 +42,14 @@
   .header-logo {
     display: flex; align-items: center; gap: 10px;
   }
-  .logo-skull {
-    font-size: 28px; line-height: 1;
+  .logo-h1 { display: flex; align-items: center; gap: 10px; margin: 0; font-weight: 400; }
+  .logo-img { height: 30px; width: auto; display: block; }
+  .logo-agenda {
+    font-family: 'Rajdhani', sans-serif; font-weight: 700; color: var(--gold);
+    font-size: 15px; letter-spacing: 5px; line-height: 1;
+    padding-left: 10px; border-left: 2px solid var(--gold);
   }
-  .logo-text {
-    font-family: 'Metal Mania', cursive;
-    font-size: 22px;
-    background: linear-gradient(135deg, #cc1a1a, #ff4444, #c8a84b);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: 1px;
-  }
+  .access-title .logo-agenda { border-left: 0; padding-left: 0; }
   .header-actions { display: flex; gap: 8px; }
   .btn-icon {
     background: var(--bg3); border: 1px solid var(--border);
@@ -391,7 +387,8 @@
     .form-group.full { grid-column: 1; }
     .stats-row { grid-template-columns: repeat(3, 1fr); }
     .stat-num { font-size: 26px; }
-    .logo-text { font-size: 18px; }
+    .logo-img { height: 28px; }
+    .logo-agenda { font-size: 12px; letter-spacing: 3px; padding-left: 8px; }
     main { padding: 12px; }
   }
 
@@ -572,7 +569,6 @@
 
   /* ── AJUSTES TRAS REFACTOR ── */
   [hidden] { display: none !important; }
-  h1.logo-text { font-weight: 400; }
   .btn-label { font-size: 13px; }
   .btn-icon { text-decoration: none; }
   button.nav-tab, button.filter-chip {
@@ -628,8 +624,9 @@
     display: flex; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;
   }
   .access-card { width: 100%; max-width: 380px; text-align: center; }
-  .access-skull { font-size: 56px; }
-  .access-title { font-family: 'Metal Mania', cursive; font-size: 34px; color: var(--red); margin: 6px 0 14px; font-weight: 400; }
+  .access-title { margin: 0 0 18px; font-weight: 400; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .access-logo { width: min(260px, 80%); height: auto; }
+  .access-title .logo-agenda { font-size: 22px; letter-spacing: 12px; margin-right: -12px; }
   .access-msg { font-size: 16px; line-height: 1.4; margin-bottom: 22px; }
   .access-form { display: flex; flex-direction: column; gap: 8px; text-align: left; margin-bottom: 18px; }
   .access-hint { font-size: 13px; color: var(--muted); line-height: 1.5; }
