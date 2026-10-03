@@ -1,6 +1,6 @@
 // Cambia VERSION cuando modifiques la lista PRECACHE; los archivos propios se refrescan solos
 // (stale-while-revalidate) y la navegación es network-first, así que no quedan versiones viejas atascadas.
-const VERSION = 'v10';
+const VERSION = 'v11';
 const CACHE = `darkcelona-${VERSION}`;
 
 const PRECACHE = [
@@ -79,6 +79,8 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET') return;
   const url = new URL(request.url);
   if (DEV && url.origin === self.location.origin) return;
+  // El manifiesto y los iconos van siempre a la red: si no, el navegador instala con una copia vieja del icono.
+  if (url.origin === self.location.origin && (url.pathname.endsWith('/manifest.json') || url.pathname.includes('/icons/'))) return;
 
   if (request.mode === 'navigate' && url.origin === self.location.origin) {
     event.respondWith(networkFirstPage(request));
