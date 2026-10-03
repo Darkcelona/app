@@ -13,7 +13,7 @@ const ICONOS = [
 export function iconoGrupo(nombre) {
   const n = String(nombre || '').toLowerCase();
   const hit = ICONOS.find(([re]) => re.test(n));
-  return hit ? hit[1] : '👥';
+  return hit ? hit[1] : '🤝';
 }
 
 /** El nombre sin los emojis que ya trae el Excel (el icono se pone aparte, más grande). */
@@ -26,7 +26,7 @@ const enlaceSeguro = u => (/^https?:\/\//i.test(String(u || '')) ? String(u) : '
 export function renderGrupos() {
   const lista = getGrupos().filter(g => g && g.n && enlaceSeguro(g.u));
   $('grupos-view').innerHTML = `
-    <div class="section-title section-title-first">👥 Otros grupos <span class="event-count">${lista.length}</span></div>
+    <div class="section-title section-title-first">🏆 Otros grupos <span class="event-count">${lista.length}</span></div>
     <p class="grupos-intro">Grupos de la comunidad Darkcelona para otras aficiones. Abiertos a todos los miembros.</p>
     ${lista.length ? lista.map(g => `
       <a class="grupo-card" href="${escHtml(enlaceSeguro(g.u))}" target="_blank" rel="noopener noreferrer">
