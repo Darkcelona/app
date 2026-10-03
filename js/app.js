@@ -319,8 +319,9 @@ async function installPWA() {
 async function registerSW() {
   if (!('serviceWorker' in navigator)) return;
   const hadController = !!navigator.serviceWorker.controller;
+  let reg;
   try {
-    await navigator.serviceWorker.register('./sw.js');
+    reg = await navigator.serviceWorker.register('./sw.js');
   } catch (e) {
     console.warn('Service Worker no disponible (sirve la app por HTTPS o localhost):', e.message);
     return;
@@ -330,8 +331,17 @@ async function registerSW() {
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (!hadController || reloaded) return;
     reloaded = true;
-    location.reload();
+    // Si está rellenando un plan, se espera a que lo cierre para no perderle lo escrito
+    const recargar = () => {
+      if (document.getElementById('modal-overlay')?.classList.contains('open')) return setTimeout(recargar, 3000);
+      location.reload();
+    };
+    recargar();
   });
+  // Buscar versión nueva al volver a la app y cada 30 minutos (publicar-web.sh cambia la versión del SW en cada publicación).
+  const buscar = () => reg.update().catch(() => {});
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) buscar(); });
+  setInterval(buscar, 30 * 60 * 1000);
 }
 
 // ── Eventos globales (delegación) ───────────────────────

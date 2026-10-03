@@ -1,6 +1,6 @@
 // Cambia VERSION cuando modifiques la lista PRECACHE; los archivos propios se refrescan solos
 // (stale-while-revalidate) y la navegación es network-first, así que no quedan versiones viejas atascadas.
-const VERSION = 'v11';
+const VERSION = 'p20261003220900';
 const CACHE = `darkcelona-${VERSION}`;
 
 const PRECACHE = [
@@ -33,7 +33,7 @@ const CDN_PRECACHE = [
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
-    await cache.addAll(PRECACHE);
+    await cache.addAll(PRECACHE.map(u => new Request(u, { cache: 'reload' })));   // 'reload': nunca una copia vieja de la caché HTTP
     // Best effort: si falla un CDN no se aborta la instalación.
     await Promise.all(CDN_PRECACHE.map(url =>
       fetch(new Request(url, { mode: 'no-cors' })).then(r => cache.put(url, r)).catch(() => {})
