@@ -62,10 +62,16 @@ function eventCard(ev, d, todayStr) {
   const myNames = namesOf(getUser());
   const id = escHtml(ev.id);
 
+  const dateHtml = `<div class="event-date-block">
+      <div class="event-day-num">${d.getDate()}</div>
+      <div class="event-month">${MONTHS_ES[d.getMonth()]}</div>
+      <div class="event-weekday">${DAYS_ES[d.getDay()]}</div>
+      ${ev.fechaFin ? `<div class="event-range">${escHtml(formatShortRange(ev.fecha, ev.fechaFin))}</div>` : ''}
+    </div>`;
   const imgSrc = safeUrl(ev.imagen) || ytThumb(extractYtId(ev.youtube || ''));
   const imgHtml = imgSrc
-    ? `<div class="event-img-col"><img class="event-img" src="${escHtml(imgSrc)}" alt="${escHtml(ev.evento)}" loading="lazy" referrerpolicy="no-referrer"><div class="event-img-placeholder" hidden><span>${icon}</span></div></div>`
-    : `<div class="event-img-col"><div class="event-img-placeholder"><span>${icon}</span></div></div>`;
+    ? `<div class="event-img-col"><img class="event-img" src="${escHtml(imgSrc)}" alt="${escHtml(ev.evento)}" loading="lazy" referrerpolicy="no-referrer"><div class="event-img-placeholder" hidden><span>${icon}</span></div>${dateHtml}</div>`
+    : `<div class="event-img-col"><div class="event-img-placeholder"><span>${icon}</span></div>${dateHtml}</div>`;
 
   const yt = safeUrl(ev.youtube);
   const tk = safeUrl(ev.tickets);
@@ -95,12 +101,6 @@ function eventCard(ev, d, todayStr) {
       ${imgHtml}
       <div class="event-content-col">
         <div class="event-card-header">
-          <div class="event-date-block">
-            <div class="event-day-num">${d.getDate()}</div>
-            <div class="event-month">${MONTHS_ES[d.getMonth()]}</div>
-            <div class="event-weekday">${DAYS_ES[d.getDay()]}</div>
-            ${ev.fechaFin ? `<div class="event-range">${escHtml(formatShortRange(ev.fecha, ev.fechaFin))}</div>` : ''}
-          </div>
           <div class="event-main">
             <div><span class="event-type-badge ${typeClass(ev.tipo)}">${escHtml(ev.tipo || 'Otros')}</span>${badges}</div>
             <div class="event-title">${escHtml(ev.evento)}</div>
