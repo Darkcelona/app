@@ -7,6 +7,7 @@ import { filters, renderEvents, renderBares, renderHistorial, toggleAttendees, f
 import { renderProfile, profileState } from './profile.js';
 import { renderCumples, renderCumpleBanner, ocultarAvisoHoy } from './cumples.js';
 import { renderGrupos } from './grupos.js';
+import { initListas, abrirLista, cerrarLista, guardarLista, borrarLista } from './listas.js';
 import { loadAdmin, adminAction, adminCreate, setLogFilter } from './admin.js';
 import {
   AuthError, isConfigured, isLoggedIn, syncNow, loadHistoryPage, loadMyHistory, pendingCount,
@@ -352,6 +353,11 @@ const actions = {
   'new-event': () => openModal(),
   'close-modal': closeModal,
   'save-event': saveEvent,
+  'lista-add': el => abrirLista(el.dataset.kind),
+  'lista-edit': el => abrirLista(el.dataset.kind, el.dataset.id),
+  'lista-del': el => borrarLista(el.dataset.kind, el.dataset.id),
+  'lista-guardar': guardarLista,
+  'lista-cerrar': cerrarLista,
   'edit': el => openModal(el.dataset.id),
   'delete': el => deleteEvent(el.dataset.id),
   'join': el => toggleGoing(el.dataset.id, true),
@@ -394,6 +400,8 @@ document.addEventListener('input', e => {
 
 $('modal-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+initListas(renderAll);
+$('lista-form').addEventListener('submit', e => { e.preventDefault(); guardarLista(); });
 $('event-form').addEventListener('submit', e => { e.preventDefault(); saveEvent(); });
 $('access-form').addEventListener('submit', e => {
   e.preventDefault();

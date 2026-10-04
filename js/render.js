@@ -190,17 +190,19 @@ function barIcon(tipo) {
   return '🍺';
 }
 
+import { botonesLista, botonAnadir } from './listas.js';
+
 export function renderBares() {
   const bares = getBares();
   $('bares-list').innerHTML =
-    `<div class="section-title">🍺 Bares & Salas <span class="event-count">${bares.length}</span></div>` +
+    `<div class="lista-cabecera">${botonAnadir('bar', 'Añadir bar')}</div><div class="section-title section-title-first">🍺 Bares & Salas <span class="event-count">${bares.length}</span></div>` +
     (bares.length ? bares.map(b => {
       const link = safeUrl(b.link);
       return `
       <div class="bar-card">
         <div class="bar-icon">${barIcon(b.tipo)}</div>
         <div>
-          <div class="bar-name">${escHtml(b.nombre)}</div>
+          <div class="bar-name">${escHtml(b.nombre)}${b.id ? botonesLista('bar', b) : ''}</div>
           <div class="bar-type">${escHtml(b.tipo)}</div>
           <div class="bar-hours">${escHtml(b.horario)}</div>
           <div class="bar-addr">📍 ${escHtml(b.direccion)}</div>

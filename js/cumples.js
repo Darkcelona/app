@@ -3,6 +3,7 @@
 import { MONTHS_FULL, KEYS } from './config.js';
 import { escHtml, normalizeName, namesOf, toISODate } from './utils.js';
 import { getCumples, getUser, lsGet, lsSet } from './store.js';
+import { botonesLista, botonAnadir } from './listas.js';
 
 const $ = id => document.getElementById(id);
 const DIA_MS = 86400000;
@@ -61,7 +62,7 @@ export const cumplesDeHoy = (lista, ahora = new Date()) => (proximos(lista, ahor
 export function porMes(lista) {
   const meses = {};
   for (let m = 1; m <= 12; m++) meses[m] = [];
-  for (const c of lista) if (meses[c.m]) meses[c.m].push({ d: c.d, n: c.n });
+  for (const c of lista) if (meses[c.m]) meses[c.m].push({ d: c.d, n: c.n, id: c.id, mio: c.mio });
   for (const m in meses) meses[m].sort((a, b) => a.d - b.d);
   return meses;
 }
@@ -118,7 +119,7 @@ export function renderCumples(ahora = new Date()) {
   if (!vista) return;
   const lista = getCumples();
   if (!lista.length) {
-    vista.innerHTML = '<div class="empty-state"><div class="empty-icon">🎂</div><div class="empty-text">Todavía no hay cumpleaños cargados.</div></div>';
+    vista.innerHTML = `<div class="lista-cabecera">${botonAnadir('cumple', 'Añadir cumpleaños')}</div><div class="empty-state"><div class="empty-icon">🎂</div><div class="empty-text">Todavía no hay cumpleaños cargados.</div></div>`;
     return;
   }
   const hoy = hoySinHora(ahora);
@@ -139,12 +140,13 @@ export function renderCumples(ahora = new Date()) {
       <summary>${MONTHS_FULL[m - 1]} <span class="event-count">${items.length}</span></summary>
       ${items.length ? items.map(x => `
         <div class="cumple-dia${m === mesActual && x.d === hoy.getDate() ? ' hoy' : ''}">
-          <span class="cumple-num">${x.d}</span><span class="cumple-nom${esMio(x.n) ? ' mio' : ''}">${etiquetaNombre(x.n)}</span>
+          <span class="cumple-num">${x.d}</span><span class="cumple-nom${esMio(x.n) ? ' mio' : ''}">${etiquetaNombre(x.n)}</span>${x.id ? botonesLista('cumple', x) : ''}
         </div>`).join('') : '<div class="cumple-dia vacio">Nadie este mes</div>'}
     </details>`;
   };
 
   vista.innerHTML = `
+    <div class="lista-cabecera">${botonAnadir('cumple', 'Añadir cumpleaños')}</div>
     <div class="section-title section-title-first">🎂 Próximos 30 días <span class="event-count">${prox.reduce((a, p) => a + p.nombres.length, 0)}</span></div>
     ${prox.length ? prox.map(filaProx).join('') : '<div class="empty-state small"><div class="empty-text">Nadie cumple años en los próximos 30 días.</div></div>'}
     <div class="section-title">📅 Todo el año <span class="event-count">${lista.length}</span></div>

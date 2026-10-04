@@ -174,6 +174,12 @@ export async function loadMyHistory() {
   setMyHistory(assignIds(json.items || (json.data && json.data.historico) || []));   // el perfil vuelve a filtrar por nombre, así que también vale con un script antiguo
 }
 
+// ── Cumpleaños y bares (cualquier miembro añade; edita/borra lo suyo) ──
+export async function itemOp(kind, op, { id = '', data = null } = {}) {
+  await post({ action: 'item', kind, op, id, data });
+  await syncNow();
+}
+
 // ── Administración (solo rol admin) ─────────────────────
 export async function admin(cmd, extra = {}) {
   return post({ action: 'admin', cmd, ...extra });

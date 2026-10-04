@@ -722,3 +722,14 @@
   .grupo-icono { font-size: 40px; line-height: 1; }
   .grupo-nombre { flex: 1; font-size: 20px; font-weight: 700; }
   .grupo-unirme { color: var(--gold); font-weight: 700; font-size: 14px; white-space: nowrap; }
+
+  /* ── AÑADIR / EDITAR CUMPLES Y BARES ── */
+  .lista-cabecera { display: flex; justify-content: flex-end; margin: 0 0 12px; }
+  .btn-add-lista {
+    background: var(--red); color: #fff; border: 0; border-radius: 10px; padding: 10px 16px;
+    font: inherit; font-weight: 700; cursor: pointer;
+  }
+  .btn-add-lista:hover { filter: brightness(1.15); }
+  .lista-acciones { display: inline-flex; gap: 6px; margin-left: 10px; vertical-align: middle; }
+  .lista-acciones .btn-sm { padding: 2px 8px; font-size: 14px; }
+  .cumple-dia { align-items: center; }

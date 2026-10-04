@@ -1,6 +1,6 @@
-// URL de la aplicación web de Google Apps Script que hace de backend (termina en /exec).
+// URL de la API (Edge Function de Supabase) que hace de backend.
 // La pone el administrador al desplegar; los usuarios nunca la ven ni la configuran.
-export const API_URL = 'https://script.google.com/macros/s/AKfycbwDjZzFkqfGGVjtDXRimMly8IIczFPt-iG6lb_8l_l4M5aVf8ifDAfJpuSBSAq081AP/exec';   // COPIA DE PRUEBAS: al pasar a producción, cambiar por la del Sheet real
+export const API_URL = 'https://oqhnqebthwqerpkiszre.supabase.co/functions/v1/api';
 
 // Solo para la consola del navegador (diagnóstico). Sube el número en cada cambio.
 export const APP_VERSION = '2026.10.02-6';
