@@ -234,3 +234,62 @@ export function entradasDeTexto(texto) {
   const m = String(texto ?? '').match(/entradas?[^\S\n]*:?[^\S\n]*(https?:\/\/[^\s<>"']+)/i);
   return m ? safeUrl(m[1].replace(/[.,;)]+$/, '')) : '';
 }
+
+// ── Calendario (Google / .ics) ──────────────────────────
+// Los planes no tienen hora, así que van como evento de día completo (o de varios días si hay fecha fin).
+const ymd = s => String(s).replace(/-/g, '');
+
+/** Texto de la descripción: previa, entradas y propone. */
+function detallesCalendario(ev, appUrl) {
+  const l = [];
+  if (ev.previa) l.push('🍺 Previa: ' + ev.previa);
+  const tk = safeUrl(ev.tickets) || entradasDeTexto(ev.evento);
+  if (tk) l.push('🎟️ Entradas: ' + tk);
+  if (ev.propone) l.push('Propone: ' + ev.propone);
+  if (appUrl) l.push('Darkcelona Agenda: ' + appUrl);
+  return l.join('\n');
+}
+
+/** Rango [inicio, fin exclusivo] en AAAAMMDD, como lo piden Google e iCalendar para los días completos. */
+function rangoCalendario(ev) {
+  const fin = ev.fechaFin && ev.fechaFin > ev.fecha ? ev.fechaFin : ev.fecha;
+  return [ymd(ev.fecha), ymd(addDays(fin, 1))];
+}
+
+/** Enlace que abre Google Calendar con el plan ya relleno (la persona solo pulsa Guardar). */
+export function calendarioGoogleUrl(ev, appUrl = '') {
+  const [a, b] = rangoCalendario(ev);
+  const p = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: String(ev.evento || '').split('\n')[0].trim(),
+    dates: `${a}/${b}`,
+    details: detallesCalendario(ev, appUrl),
+    location: String(ev.sitio || '').split('\n')[0].trim(),
+  });
+  return 'https://calendar.google.com/calendar/render?' + p.toString();
+}
+
+const icsTexto = s => String(s ?? '').replace(/\\/g, '\\\\').replace(/\r?\n/g, '\\n').replace(/([,;])/g, '\\$1');
+/** Corta las líneas a 75 caracteres, como exige el formato. */
+const icsLinea = l => (l.match(/.{1,73}/gu) || ['']).map((t, i) => (i ? ' ' : '') + t).join('\r\n');
+
+/** Contenido de un archivo .ics (Apple Calendario, Outlook, Google...). */
+export function calendarioIcs(ev, appUrl = '', ahora = new Date()) {
+  const [a, b] = rangoCalendario(ev);
+  const sello = ahora.toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  const lineas = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Darkcelona Agenda//ES', 'CALSCALE:GREGORIAN',
+    'BEGIN:VEVENT',
+    `UID:${hashId(eventKey(ev))}-${a}@darkcelona`,
+    `DTSTAMP:${sello}`,
+    `DTSTART;VALUE=DATE:${a}`,
+    `DTEND;VALUE=DATE:${b}`,
+    `SUMMARY:${icsTexto(String(ev.evento || '').split('\n')[0].trim())}`,
+  ];
+  const loc = String(ev.sitio || '').split('\n')[0].trim();
+  if (loc) lineas.push(`LOCATION:${icsTexto(loc)}`);
+  const det = detallesCalendario(ev, appUrl);
+  if (det) lineas.push(`DESCRIPTION:${icsTexto(det)}`);
+  lineas.push('END:VEVENT', 'END:VCALENDAR');
+  return lineas.map(icsLinea).join('\r\n') + '\r\n';
+}

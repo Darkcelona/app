@@ -653,6 +653,35 @@
   .btn-join.joined:hover { background: rgba(200,168,75,.26); }
   .event-card.past .event-card-header { padding-bottom: 14px; }
 
+  /* ── NOVEDADES ── */
+  .nav-badge {
+    display: inline-block; min-width: 18px; margin-left: 6px; padding: 1px 5px; border-radius: 9px;
+    background: var(--red); color: #fff; font-size: 11px; font-weight: 700; line-height: 16px; text-align: center;
+    animation: pulso 1.6s ease-in-out infinite;
+  }
+  .nav-badge[hidden] { display: none; }
+  @keyframes pulso { 0%, 100% { box-shadow: 0 0 0 0 rgba(204,26,26,.7); } 50% { box-shadow: 0 0 0 6px rgba(204,26,26,0); } }
+  .novedades-banner {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; margin-bottom: 14px; padding: 12px 16px;
+    border-radius: 12px; border: 1px solid var(--red); background: linear-gradient(135deg, rgba(204,26,26,.28), rgba(204,26,26,.1));
+    color: var(--text); font-family: 'Rajdhani', sans-serif; font-size: 16px; font-weight: 700; text-align: left; cursor: pointer;
+    animation: pulso 2s ease-in-out infinite;
+  }
+  .novedades-banner[hidden] { display: none; }
+  .novedades-banner-go { color: #ff7777; white-space: nowrap; }
+  .novedades-hint { font-size: 13px; color: var(--muted); margin: -4px 0 12px; line-height: 1.5; }
+  .new-badge {
+    display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 4px; background: var(--red); color: #fff;
+    font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1px;
+  }
+  .event-card.is-new { border-color: var(--red); box-shadow: 0 0 0 1px var(--red), 0 0 18px rgba(204,26,26,.45); }
+
+  /* ── CALENDARIO ── */
+  .btn-cal { border-right: none; padding: 8px 12px; font-size: 15px; }
+  .cal-evento { font-weight: 700; margin: 0 0 14px; }
+  .cal-opciones { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .cal-recordar { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); }
+
   /* ── PERFIL ── */
   .profile-head { display: flex; align-items: center; gap: 14px; margin: 4px 0 18px; }
   .profile-avatar { font-size: 40px; width: 64px; height: 64px; border-radius: 50%; background: var(--bg3); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }

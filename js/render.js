@@ -2,6 +2,7 @@ import { MONTHS_ES, MONTHS_FULL, DAYS_ES, TYPE_ICONS, DEFAULT_TYPES, HISTORY_PAG
 import { escHtml, safeUrl, parseDate, getAttendees, today, normalizeName, namesOf, extractYtId, ytThumb, formatShortRange, mapsUrl, entradasDeTexto } from './utils.js';
 import { getEvents, getBares, getUser, hasMe, isAdmin } from './store.js';
 import { historyState } from './api.js';
+import { esNuevo, recientes, marcarVisto, sinVer } from './novedades.js';
 
 const $ = id => document.getElementById(id);
 
@@ -72,7 +73,8 @@ function lugar(icono, texto, extra = '') {
   return `<div class="event-venue ${extra}">${maps ? `<a class="venue-link" href="${escHtml(maps)}" target="_blank" rel="noopener noreferrer" title="Ver en Google Maps">${cuerpo}</a>` : cuerpo}</div>`;
 }
 
-function eventCard(ev, d, todayStr) {
+export function eventCard(ev, d, todayStr) {
+  const nuevo = esNuevo(ev);
   const attendees = getAttendees(ev.asistentes);
   const mine = hasMe(ev.asistentes);
   const upcoming = isUpcoming(ev, todayStr);
@@ -106,16 +108,16 @@ function eventCard(ev, d, todayStr) {
   ).join('');
 
   const estadoVenta = ESTADOS_VENTA[ev.estadoVenta] ? `<span class="venta-badge venta-${escHtml(ev.estadoVenta)}">${ESTADOS_VENTA[ev.estadoVenta]}</span>` : '';
-  const badges = estadoVenta + (ev.fecha === todayStr || (ev.fechaFin && ev.fecha <= todayStr && ev.fechaFin >= todayStr)
+  const badges = (nuevo ? '<span class="new-badge">✨ NUEVO</span>' : '') + estadoVenta + (ev.fecha === todayStr || (ev.fechaFin && ev.fecha <= todayStr && ev.fechaFin >= todayStr)
     ? '<span class="upcoming-badge">HOY</span>'
     : '');
 
   const joinBtn = !upcoming ? '' : mine
-    ? `<button class="btn-join joined" data-action="leave" data-id="${id}">✓ Voy · Quitarme</button>`
+    ? `<button class="btn-join joined" data-action="leave" data-id="${id}">✓ Voy · Quitarme</button><button class="btn-join btn-cal" data-action="calendar" data-id="${id}" title="Añadir a mi calendario" aria-label="Añadir a mi calendario">📅</button>`
     : `<button class="btn-join" data-action="join" data-id="${id}">＋ Apuntarme</button>`;
 
   return `
-  <article class="event-card${mine ? ' omar-event' : ''}" data-id="${id}">
+  <article class="event-card${mine ? ' omar-event' : ''}${nuevo ? ' is-new' : ''}" data-id="${id}">
     <div class="event-card-inner">
       ${imgHtml}
       <div class="event-content-col">
@@ -184,6 +186,33 @@ export function renderEvents() {
   }
   list.innerHTML = html || `<div class="empty-state"><div class="empty-icon">🎸</div><div class="empty-text">${
     events.length ? 'No hay eventos que coincidan' : 'Todavía no hay planes. ¡Añade el primero con el botón +!'}</div></div>`;
+}
+
+// ── Novedades ───────────────────────────────────────────
+export function renderNovedades() {
+  const todayStr = today();
+  const lista = recientes(getEvents(), todayStr);
+  let html = `<div class="section-title section-title-first">✨ Novedades <span class="event-count">${lista.length}</span></div>
+    <p class="novedades-hint">Planes que ha añadido gente del grupo en las últimas dos semanas. Los de después de tu última visita van resaltados.</p>`;
+  for (const ev of lista) {
+    const d = parseDate(ev.fecha);
+    if (d) html += eventCard(ev, d, todayStr);
+  }
+  if (!lista.length) html += '<div class="empty-state"><div class="empty-icon">✨</div><div class="empty-text">Nada nuevo por ahora. Cuando alguien añada un plan, aparecerá aquí.</div></div>';
+  $('novedades-view').innerHTML = html;
+  marcarVisto();
+}
+
+/** Burbuja de la pestaña, aviso en Quedadas e insignia del icono de la app: cuántos planes nuevos hay sin ver. */
+export function renderNovedadesAviso() {
+  const n = sinVer().length;
+  const badge = $('novedades-badge');
+  badge.textContent = n > 9 ? '9+' : String(n);
+  badge.hidden = !n;
+  const banner = $('novedades-banner');
+  banner.hidden = !n;
+  if (n) banner.querySelector('.novedades-banner-text').textContent = n === 1 ? '✨ Hay 1 plan nuevo desde tu última visita' : `✨ Hay ${n} planes nuevos desde tu última visita`;
+  try { if (navigator.setAppBadge) (n ? navigator.setAppBadge(n) : navigator.clearAppBadge()).catch(() => {}); } catch { /* noop */ }
 }
 
 export function toggleAttendees(btn) {

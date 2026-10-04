@@ -32,6 +32,7 @@
 
 <nav class="nav-tabs" role="tablist">
   <button class="nav-tab active" role="tab" aria-selected="true" data-tab="quedadas">🎸 Quedadas</button>
+  <button class="nav-tab" role="tab" aria-selected="false" data-tab="novedades">✨ Novedades<span class="nav-badge" id="novedades-badge" hidden></span></button>
   <button class="nav-tab" role="tab" aria-selected="false" data-tab="bares">🍺 Bares</button>
   <button class="nav-tab" role="tab" aria-selected="false" data-tab="cumples">🎂 Cumples</button>
   <button class="nav-tab" role="tab" aria-selected="false" data-tab="grupos">🏆 Grupos</button>
@@ -62,6 +63,10 @@
   <section id="panel-quedadas" class="panel active" role="tabpanel">
     <div id="cumple-banner" class="cumple-banner" hidden></div>
 
+    <button id="novedades-banner" class="novedades-banner" data-action="goto-novedades" hidden>
+      <span class="novedades-banner-text"></span><span class="novedades-banner-go">Verlos →</span>
+    </button>
+
     <div id="sync-bar" class="sync-bar" hidden>
       <span class="sync-icon" id="sync-icon">🔄</span>
       <span class="sync-text" id="sync-text"></span>
@@ -81,6 +86,11 @@
     <input class="filter-search" type="search" id="search-input" placeholder="🔍 Buscar eventos, sitios, asistentes..." aria-label="Buscar eventos">
 
     <div id="events-list"></div>
+  </section>
+
+  <!-- NOVEDADES -->
+  <section id="panel-novedades" class="panel" role="tabpanel">
+    <div id="novedades-view"></div>
   </section>
 
   <!-- BARES -->
@@ -132,6 +142,23 @@
       <button class="btn-secondary" data-action="lista-cerrar">Cancelar</button>
       <button class="btn-primary" data-action="lista-guardar">🤘 Guardar</button>
     </div>
+  </div>
+</div>
+
+<!-- AÑADIR AL CALENDARIO -->
+<div class="modal-overlay" id="cal-overlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="cal-title">
+    <div class="modal-title">
+      <span id="cal-title">📅 Añadir a mi calendario</span>
+      <button class="modal-close" data-action="cal-cerrar" aria-label="Cerrar">✕</button>
+    </div>
+    <p class="cal-evento" id="cal-evento"></p>
+    <div class="cal-opciones">
+      <button class="btn-primary" data-action="cal-elegir" data-via="google">Google Calendar</button>
+      <button class="btn-secondary" data-action="cal-elegir" data-via="ics">Apple / Outlook (archivo .ics)</button>
+      <button class="btn-secondary" data-action="cal-elegir" data-via="no">Ahora no</button>
+    </div>
+    <label class="cal-recordar"><input type="checkbox" id="cal-recordar" checked> Recordar mi elección para los próximos planes</label>
   </div>
 </div>
 

@@ -3,7 +3,9 @@ import { safeUrl, parseDate, uid, today, extractYtId, ytThumb, addAttendee, remo
 import {
   getEvents, setEvents, getUser, isAdmin, getCode, setCode, getApiUrl, setDevApiUrl, EN_LOCAL, clearSession, lsGet, lsSet,
 } from './store.js';
-import { filters, renderEvents, renderBares, renderHistorial, toggleAttendees, fillTypeSelect } from './render.js';
+import { filters, renderEvents, renderBares, renderHistorial, toggleAttendees, fillTypeSelect, renderNovedades, renderNovedadesAviso } from './render.js';
+import { asegurarVisto, entrarNovedades, salirNovedades } from './novedades.js';
+import { alApuntarse, abrirCalendario, elegirCalendario, cerrarCalendario } from './calendario.js';
 import { renderProfile, profileState } from './profile.js';
 import { renderCumples, renderCumpleBanner, ocultarAvisoHoy } from './cumples.js';
 import { renderGrupos } from './grupos.js';
@@ -54,6 +56,8 @@ function logout(msg) {
 let currentTab = 'quedadas';
 
 function selectTab(name) {
+  if (currentTab === 'novedades' && name !== 'novedades') salirNovedades();
+  if (name === 'novedades' && currentTab !== 'novedades') entrarNovedades();
   currentTab = name;
   document.querySelectorAll('.nav-tab').forEach(t => {
     const active = t.dataset.tab === name;
@@ -61,6 +65,7 @@ function selectTab(name) {
     t.setAttribute('aria-selected', String(active));
   });
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+  if (name === 'novedades') { renderNovedades(); renderNovedadesAviso(); }
   if (name === 'bares') renderBares();
   if (name === 'cumples') renderCumples();
   if (name === 'grupos') renderGrupos();
@@ -89,6 +94,9 @@ function selectFilter(chip) {
 }
 
 function renderAll() {
+  asegurarVisto();
+  if (currentTab === 'novedades') renderNovedades();
+  renderNovedadesAviso();
   renderEvents();
   renderCumpleBanner();
   if (currentTab === 'cumples') renderCumples();
@@ -174,6 +182,7 @@ function toggleGoing(id, joining) {
   renderAll();
   showToast(joining ? '🤘 ¡Apuntado!' : 'Te has quitado del plan');
   scheduleFlush();
+  if (joining) alApuntarse(ev);
 }
 
 // ── Modal de evento ─────────────────────────────────────
@@ -365,6 +374,10 @@ const actions = {
   'toggle': el => toggleAttendees(el),
   'sync': () => runSync(true),
   'goto-profile': () => selectTab('perfil'),
+  'goto-novedades': () => selectTab('novedades'),
+  'calendar': el => abrirCalendario(el.dataset.id),
+  'cal-elegir': el => elegirCalendario(el.dataset.via),
+  'cal-cerrar': cerrarCalendario,
   'cumple-dismiss': () => ocultarAvisoHoy(),
   'history-more': async () => {
     const pintar = () => { if (currentTab === 'historial') renderHistorial(); };
@@ -399,7 +412,8 @@ document.addEventListener('input', e => {
 });
 
 $('modal-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+$('cal-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) cerrarCalendario(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); cerrarCalendario(); } });
 initListas(renderAll);
 $('lista-form').addEventListener('submit', e => { e.preventDefault(); guardarLista(); });
 $('event-form').addEventListener('submit', e => { e.preventDefault(); saveEvent(); });

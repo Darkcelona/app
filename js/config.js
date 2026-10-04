@@ -3,7 +3,7 @@
 export const API_URL = 'https://oqhnqebthwqerpkiszre.supabase.co/functions/v1/api';
 
 // Solo para la consola del navegador (diagnóstico). Sube el número en cada cambio.
-export const APP_VERSION = '2026.10.02-6';
+export const APP_VERSION = '2026.10.04-1';
 
 export const KEYS = {
   events: 'darkcelona-events',
@@ -12,6 +12,8 @@ export const KEYS = {
   bares: 'darkcelona-bares',
   cumples: 'darkcelona-cumples',
   grupos: 'darkcelona-grupos',
+  novedadesVisto: 'darkcelona-novedades-visto',   // fecha de alta (del servidor) del último plan que ya vi
+  calendario: 'darkcelona-calendario',            // 'google' | 'ics' | 'no': qué hacer al apuntarme
   cumpleOculto: 'darkcelona-cumple-oculto',   // día (AAAA-MM-DD) en que se cerró el aviso de cumpleaños
   code: 'darkcelona-code',
   user: 'darkcelona-user',
