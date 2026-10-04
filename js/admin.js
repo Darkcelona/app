@@ -3,7 +3,7 @@ import { escHtml } from './utils.js';
 import { admin } from './api.js';
 import { $, showToast, copyText } from './ui.js';
 
-const state = { users: [], log: [], filter: '', reveal: null, loaded: false, error: '' };
+const state = { users: [], log: [], filter: '', reveal: null, loaded: false, error: '', entradas: '', entradasBusy: false };
 
 const appBase = () => location.origin + location.pathname.replace(/index\.html$/, '');
 const linkFor = u => u.link || `${appBase()}#acceso=${u.code}`;
@@ -71,7 +71,14 @@ export function renderAdmin() {
         </div>
       </div>` : ''}
 
-    <div class="section-title section-title-first">👥 Personas <span class="event-count">${active} activas · ${state.users.length} en total</span></div>
+    <div class="section-title section-title-first">🎟️ Entradas y precios</div>
+    <div class="settings-card">
+      <div class="settings-desc">Cada día, la primera vez que alguien abre la app, se traen de MetalBiblia los enlaces, precios y estados de los conciertos. Si acabas de añadir algo allí, puedes traerlo ahora.</div>
+      <div class="settings-actions"><button class="btn-primary" data-action="admin-entradas" ${state.entradasBusy ? 'disabled' : ''}>${state.entradasBusy ? 'Sincronizando…' : '🔄 Sincronizar entradas ahora'}</button></div>
+      ${state.entradas ? `<div class="settings-desc" style="margin-top:10px;white-space:pre-line">${escHtml(state.entradas)}</div>` : ''}
+    </div>
+
+    <div class="section-title">👥 Personas <span class="event-count">${active} activas · ${state.users.length} en total</span></div>
     <form class="settings-card" id="admin-new" data-action-submit="admin-create">
       <div class="settings-label">Añadir persona</div>
       <div class="admin-form">
@@ -148,6 +155,19 @@ export async function adminAction(action, el) {
     case 'admin-copy': {
       const ok = await copyText($('reveal-link').value);
       showToast(ok ? '📋 Enlace copiado' : 'Selecciónalo y cópialo a mano', ok ? 'success' : 'error');
+      return true;
+    }
+    case 'admin-entradas': {
+      state.entradasBusy = true; state.entradas = ''; renderAdmin();
+      const r = await run(() => admin('entradas.sync'));
+      state.entradasBusy = false;
+      if (r && r.ok) {
+        const nuevos = (r.vinculosNuevos || []).map(x => '• ' + x).join('\n');
+        state.entradas = `MetalBiblia tiene ${r.metalbiblia} próximos. Planes revisados: ${r.nuestros}. Actualizados: ${r.actualizados}. Sin cambios: ${r.sinCambios}.` + (nuevos ? `\nVínculos nuevos:\n${nuevos}` : '');
+        showToast(r.actualizados ? `🎟️ ${r.actualizados} planes actualizados` : '🎟️ Todo al día');
+        document.querySelector('[data-action="sync"]')?.click();     // refresca los planes en pantalla
+      } else if (r) state.entradas = r.error || 'No se ha podido sincronizar';
+      renderAdmin();
       return true;
     }
     case 'admin-dismiss':
