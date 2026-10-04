@@ -1,5 +1,5 @@
 import { MONTHS_ES, MONTHS_FULL, DAYS_ES, TYPE_ICONS, DEFAULT_TYPES, HISTORY_PAGE, TIPOS_CONCIERTO } from './config.js';
-import { escHtml, safeUrl, parseDate, getAttendees, today, normalizeName, namesOf, extractYtId, ytThumb, formatShortRange } from './utils.js';
+import { escHtml, safeUrl, parseDate, getAttendees, today, normalizeName, namesOf, extractYtId, ytThumb, formatShortRange, mapsUrl, entradasDeTexto } from './utils.js';
 import { getEvents, getBares, getUser, hasMe, isAdmin } from './store.js';
 import { historyState } from './api.js';
 
@@ -54,6 +54,15 @@ export function fillTypeSelect(current) {
 }
 
 // ── Tarjeta de evento ───────────────────────────────────
+/** Línea de lugar: si hay sitio, es un enlace a Google Maps (en el móvil abre la app de mapas). */
+function lugar(icono, texto, extra = '') {
+  const t = String(texto || '').trim();
+  if (!t) return '';
+  const maps = mapsUrl(t);
+  const cuerpo = `${icono} ${escHtml(t)}`;
+  return `<div class="event-venue ${extra}">${maps ? `<a class="venue-link" href="${escHtml(maps)}" target="_blank" rel="noopener noreferrer" title="Ver en Google Maps">${cuerpo}</a>` : cuerpo}</div>`;
+}
+
 function eventCard(ev, d, todayStr) {
   const attendees = getAttendees(ev.asistentes);
   const mine = hasMe(ev.asistentes);
@@ -74,7 +83,7 @@ function eventCard(ev, d, todayStr) {
     : `<div class="event-img-col"><div class="event-img-placeholder"><span>${icon}</span></div>${dateHtml}</div>`;
 
   const yt = safeUrl(ev.youtube);
-  const tk = safeUrl(ev.tickets);
+  const tk = safeUrl(ev.tickets) || entradasDeTexto(ev.evento);
   const mediaBtns = (yt || tk)
     ? `<div class="event-media-btns">${
         yt ? `<a class="btn-yt" href="${escHtml(yt)}" target="_blank" rel="noopener noreferrer">▶ YouTube</a>` : ''
@@ -104,8 +113,8 @@ function eventCard(ev, d, todayStr) {
           <div class="event-main">
             <div><span class="event-type-badge ${typeClass(ev.tipo)}">${escHtml(ev.tipo || 'Otros')}</span>${badges}</div>
             <div class="event-title">${escHtml(ev.evento)}</div>
-            <div class="event-venue">📍 ${escHtml(ev.sitio || '')}</div>
-            ${ev.previa ? `<div class="event-venue event-previa">🍺 Previa: ${escHtml(ev.previa)}</div>` : ''}
+            ${lugar('📍', ev.sitio)}
+            ${ev.previa ? lugar('🍺 Previa:', ev.previa, 'event-previa') : ''}
           </div>
           <div class="event-actions">
             <button class="btn-sm" data-action="edit" data-id="${id}" aria-label="Editar evento">✏️</button>

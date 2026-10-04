@@ -222,3 +222,15 @@ export function extraerCodigo(texto) {
   const crudo = m ? m[1] : t.replace(/\s+/g, '');
   try { return decodeURIComponent(crudo); } catch { return crudo; }
 }
+
+/** Enlace de Google Maps para un sitio. Solo cuenta la primera línea (las siguientes suelen ser horas o notas). */
+export function mapsUrl(sitio) {
+  const lugar = String(sitio ?? '').split('\n')[0].trim();
+  return lugar ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lugar)}` : '';
+}
+
+/** Enlace de entradas escrito dentro del texto del evento ("Entradas: https://…"). Solo si lo precede la palabra "entradas". */
+export function entradasDeTexto(texto) {
+  const m = String(texto ?? '').match(/entradas?[^\S\n]*:?[^\S\n]*(https?:\/\/[^\s<>"']+)/i);
+  return m ? safeUrl(m[1].replace(/[.,;)]+$/, '')) : '';
+}
