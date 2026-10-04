@@ -15,6 +15,7 @@ function planRow(ev, past) {
     <div class="plan-main">
       <div class="plan-title">${TYPE_ICONS[ev.tipo] || '🎸'} ${escHtml(ev.evento)}</div>
       <div class="plan-sub">${escHtml(ev.tipo || '')}${ev.sitio ? ' · 📍 ' + escHtml(ev.sitio) : ''}</div>
+      ${!past && ev.previa ? `<div class="plan-sub plan-previa">🍺 Previa: ${escHtml(ev.previa)}</div>` : ''}
     </div>
   </div>`;
 }
