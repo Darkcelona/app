@@ -163,6 +163,7 @@
     font-size: 13px; color: var(--muted);
     display: flex; align-items: center; gap: 4px;
   }
+  .event-previa { margin-top: 3px; color: var(--gold); white-space: pre-line; align-items: flex-start; }
   .event-actions { display: flex; gap: 6px; }
   .btn-sm {
     background: none; border: 1px solid var(--border);

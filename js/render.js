@@ -105,6 +105,7 @@ function eventCard(ev, d, todayStr) {
             <div><span class="event-type-badge ${typeClass(ev.tipo)}">${escHtml(ev.tipo || 'Otros')}</span>${badges}</div>
             <div class="event-title">${escHtml(ev.evento)}</div>
             <div class="event-venue">📍 ${escHtml(ev.sitio || '')}</div>
+            ${ev.previa ? `<div class="event-venue event-previa">🍺 Previa: ${escHtml(ev.previa)}</div>` : ''}
           </div>
           <div class="event-actions">
             <button class="btn-sm" data-action="edit" data-id="${id}" aria-label="Editar evento">✏️</button>
@@ -115,7 +116,6 @@ function eventCard(ev, d, todayStr) {
         <div class="event-body event-body-hidden">
           ${ev.propone ? `<div class="event-proposer">👤 Propone: <strong>${escHtml(ev.propone)}</strong></div>` : ''}
           <div class="attendees-list">${chips}</div>
-          ${ev.previa ? `<div class="previa-info">🍺 Previa: ${escHtml(ev.previa)}</div>` : ''}
         </div>
         <div class="event-foot">
           ${joinBtn}
