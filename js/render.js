@@ -114,7 +114,7 @@ function eventCard(ev, d, todayStr) {
             <div><span class="event-type-badge ${typeClass(ev.tipo)}">${escHtml(ev.tipo || 'Otros')}</span>${badges}</div>
             <div class="event-title">${escHtml(ev.evento)}</div>
             ${lugar('📍', ev.sitio)}
-            ${ev.previa ? lugar('🍺 Previa:', ev.previa, 'event-previa') : ''}
+            ${ev.previa ? `<div class="event-venue event-previa">🍺 Previa: ${escHtml(ev.previa)}</div>` : ''}
           </div>
           <div class="event-actions">
             <button class="btn-sm" data-action="edit" data-id="${id}" aria-label="Editar evento">✏️</button>
