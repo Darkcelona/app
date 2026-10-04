@@ -54,6 +54,15 @@ export function fillTypeSelect(current) {
 }
 
 // ── Tarjeta de evento ───────────────────────────────────
+const ESTADOS_VENTA = { agotado: 'AGOTADO', cancelado: 'CANCELADO', aplazado: 'APLAZADO' };
+const eur = n => `${Number(n).toLocaleString('es-ES', { minimumFractionDigits: Number.isInteger(Number(n)) ? 0 : 2, maximumFractionDigits: 2 })} €`;
+/** " · desde 30 €" (o "30–45 €") si se conoce el precio. */
+function precioTexto(ev) {
+  const a = ev.precioMin, b = ev.precioMax;
+  if (a == null || !(Number(a) > 0)) return '';
+  return b != null && Number(b) > Number(a) ? ` · ${eur(a)}–${eur(b)}` : ` · desde ${eur(a)}`;
+}
+
 /** Línea de lugar: si hay sitio, es un enlace a Google Maps (en el móvil abre la app de mapas). */
 function lugar(icono, texto, extra = '') {
   const t = String(texto || '').trim();
@@ -88,7 +97,7 @@ function eventCard(ev, d, todayStr) {
     ? `<div class="event-media-btns">${
         yt ? `<a class="btn-yt" href="${escHtml(yt)}" target="_blank" rel="noopener noreferrer">▶ YouTube</a>` : ''
       }${
-        tk ? `<a class="btn-ticket" href="${escHtml(tk)}" target="_blank" rel="noopener noreferrer">🎟️ Entradas</a>` : ''
+        tk ? `<a class="btn-ticket" href="${escHtml(tk)}" target="_blank" rel="noopener noreferrer">🎟️ Entradas${precioTexto(ev)}</a>` : ''
       }</div>`
     : '';
 
@@ -96,9 +105,10 @@ function eventCard(ev, d, todayStr) {
     `<span class="attendee-chip${myNames.includes(normalizeName(a)) ? ' omar' : ''}">${escHtml(a)}</span>`
   ).join('');
 
-  const badges = ev.fecha === todayStr || (ev.fechaFin && ev.fecha <= todayStr && ev.fechaFin >= todayStr)
+  const estadoVenta = ESTADOS_VENTA[ev.estadoVenta] ? `<span class="venta-badge venta-${escHtml(ev.estadoVenta)}">${ESTADOS_VENTA[ev.estadoVenta]}</span>` : '';
+  const badges = estadoVenta + (ev.fecha === todayStr || (ev.fechaFin && ev.fecha <= todayStr && ev.fechaFin >= todayStr)
     ? '<span class="upcoming-badge">HOY</span>'
-    : '';
+    : '');
 
   const joinBtn = !upcoming ? '' : mine
     ? `<button class="btn-join joined" data-action="leave" data-id="${id}">✓ Voy · Quitarme</button>`
