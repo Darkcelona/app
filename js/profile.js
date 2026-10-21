@@ -2,6 +2,7 @@ import { MONTHS_ES, TYPE_ICONS } from './config.js';
 import { escHtml, parseDate, today } from './utils.js';
 import { getEvents, getMyHistory, getUser, hasMe, isAdmin } from './store.js';
 import { isUpcoming } from './render.js';
+import { vacioHTML } from './mascota.js';
 
 const $ = id => document.getElementById(id);
 export const profileState = { pastLimit: 30 };
@@ -58,7 +59,7 @@ export function renderProfile(historyReady) {
     </div>
 
     <div class="section-title">🗓️ Mis próximos planes <span class="event-count">${next.length}</span></div>
-    ${next.length ? next.map(e => planRow(e, false)).join('') : '<div class="empty-state small"><div class="empty-text">No estás apuntado a nada todavía. Ve a Quedadas y pulsa "Apuntarme".</div></div>'}
+    ${next.length ? next.map(e => planRow(e, false)).join('') : vacioHTML('triste', 'No estás apuntado a nada todavía. Ve a Quedadas y pulsa "Apuntarme".', { pequeno: true, una: true })}
 
     <div class="section-title">📜 Mi historial <span class="event-count">${past.length}</span></div>
     ${years.length ? `<div class="year-chips">${years.map(y => `<span class="attendee-chip">${y}: <strong>${byYear[y]}</strong></span>`).join('')}</div>` : ''}

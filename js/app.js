@@ -16,12 +16,14 @@ import {
   queueUpsert, queueDelete, queueJoin, queueLeave, diffEvent,
 } from './api.js';
 import { $, showToast } from './ui.js';
+import { celebrar, mascotaHTML } from './mascota.js';
 
 console.info(`Darkcelona ${APP_VERSION}`);
 
 // ── Acceso ──────────────────────────────────────────────
 function showAccess(msg) {
   $('access-msg').textContent = msg;
+  $('access-mascota').innerHTML = mascotaHTML('saludo', { clase: 'mascota-acceso', una: true });
   $('access-screen').hidden = false;
   document.body.classList.add('locked');
   $('user-chip').hidden = true;
@@ -182,7 +184,7 @@ function toggleGoing(id, joining) {
   renderAll();
   showToast(joining ? '🤘 ¡Apuntado!' : 'Te has quitado del plan');
   scheduleFlush();
-  if (joining) alApuntarse(ev);
+  if (joining) { celebrar(); alApuntarse(ev); }
 }
 
 // ── Modal de evento ─────────────────────────────────────

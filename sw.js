@@ -1,6 +1,6 @@
 // Cambia VERSION cuando modifiques la lista PRECACHE; los archivos propios se refrescan solos
 // (stale-while-revalidate) y la navegación es network-first, así que no quedan versiones viejas atascadas.
-const VERSION = 'p20261004194839';
+const VERSION = 'p20261021224351';
 const CACHE = `darkcelona-${VERSION}`;
 
 const PRECACHE = [
@@ -23,6 +23,7 @@ const PRECACHE = [
   './js/novedades.js',
   './js/calendario.js',
   './js/admin.js',
+  './js/mascota.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
 ];

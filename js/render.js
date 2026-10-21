@@ -3,6 +3,7 @@ import { escHtml, safeUrl, parseDate, getAttendees, today, normalizeName, namesO
 import { getEvents, getBares, getUser, hasMe, isAdmin } from './store.js';
 import { historyState } from './api.js';
 import { esNuevo, recientes, marcarVisto, sinVer } from './novedades.js';
+import { vacioHTML } from './mascota.js';
 
 const $ = id => document.getElementById(id);
 
@@ -184,8 +185,9 @@ export function renderEvents() {
     }
     html += eventCard(ev, d, todayStr);
   }
-  list.innerHTML = html || `<div class="empty-state"><div class="empty-icon">🎸</div><div class="empty-text">${
-    events.length ? 'No hay eventos que coincidan' : 'Todavía no hay planes. ¡Añade el primero con el botón +!'}</div></div>`;
+  list.innerHTML = html || (events.length
+    ? vacioHTML('triste', 'No hay eventos que coincidan', { una: true })
+    : vacioHTML('baile', 'Todavía no hay planes. ¡Añade el primero con el botón +!'));
 }
 
 // ── Novedades ───────────────────────────────────────────
@@ -198,7 +200,7 @@ export function renderNovedades() {
     const d = parseDate(ev.fecha);
     if (d) html += eventCard(ev, d, todayStr);
   }
-  if (!lista.length) html += '<div class="empty-state"><div class="empty-icon">✨</div><div class="empty-text">Nada nuevo por ahora. Cuando alguien añada un plan, aparecerá aquí.</div></div>';
+  if (!lista.length) html += vacioHTML('saludo', 'Nada nuevo por ahora. Cuando alguien añada un plan, aparecerá aquí.', { una: true });
   $('novedades-view').innerHTML = html;
   marcarVisto();
 }

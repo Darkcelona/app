@@ -312,6 +312,20 @@
   .empty-icon { font-size: 48px; margin-bottom: 12px; }
   .empty-text { font-size: 16px; }
 
+  /* ── MASCOTA ── */
+  .mascota { display: block; height: auto; pointer-events: none; user-select: none; }
+  .mascota-vacio { width: 170px; aspect-ratio: 1; object-fit: contain; margin: 0 auto 8px; }
+  .empty-state.small .mascota-vacio { width: 120px; }
+  .mascota-acceso { width: 150px; aspect-ratio: 1; object-fit: contain; margin: 4px auto 0; }
+  .mascota-pop {
+    position: fixed; left: 50%; bottom: calc(118px + var(--safe-bottom)); z-index: 299;
+    transform: translateX(-50%) translateY(30px) scale(.6); opacity: 0;
+    transition: transform .35s cubic-bezier(.3,1.6,.5,1), opacity .25s;
+    pointer-events: none;
+  }
+  .mascota-pop.show { transform: translateX(-50%) translateY(0) scale(1); opacity: 1; }
+  .mascota-pop .mascota { width: 150px; aspect-ratio: 1; object-fit: contain; filter: drop-shadow(0 6px 18px rgba(204,26,26,.45)); }
+
   /* ── NOTIFICATION BANNER ── */
   .notif-banner {
     background: rgba(200,168,75,.1); border: 1px solid var(--gold);
