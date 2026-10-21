@@ -27,7 +27,7 @@ export function renderGrupos() {
   const lista = getGrupos().filter(g => g && g.n && enlaceSeguro(g.u));
   $('grupos-view').innerHTML = `
     <div class="section-title section-title-first">🏆 Otros grupos <span class="event-count">${lista.length}</span></div>
-    <p class="grupos-intro">Grupos de la comunidad Darkcelona para otras aficiones. Abiertos a todos los miembros.</p>
+    <p class="grupos-intro">Grupos de la comunidad Darkcelona para la práctica de otras aficiones. Abiertos a todos los miembros.</p>
     ${lista.length ? lista.map(g => `
       <a class="grupo-card" href="${escHtml(enlaceSeguro(g.u))}" target="_blank" rel="noopener noreferrer">
         <span class="grupo-icono" aria-hidden="true">${iconoGrupo(g.n)}</span>
