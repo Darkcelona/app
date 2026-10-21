@@ -695,6 +695,11 @@
   .cal-evento { font-weight: 700; margin: 0 0 14px; }
   .cal-opciones { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
   .cal-recordar { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); }
+  /* En pantallas anchas, el calendario sube y la mascota que celebra baja para no taparse (en móvil ya caben) */
+  @media (min-width: 481px) {
+    #cal-overlay { align-items: flex-start; padding-top: max(16px, 7vh); }
+    .mascota-pop { bottom: calc(98px + var(--safe-bottom)); }
+  }
 
   /* ── PERFIL ── */
   .profile-head { display: flex; align-items: center; gap: 14px; margin: 4px 0 18px; }
