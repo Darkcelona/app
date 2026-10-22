@@ -1,5 +1,5 @@
 import { APP_VERSION, SYNC_MIN_INTERVAL_MS } from './config.js';
-import { safeUrl, parseDate, uid, today, extractYtId, ytThumb, addAttendee, removeAttendee, extraerCodigo, hayHueco, acompanantes, setAcompanantes } from './utils.js';
+import { safeUrl, parseDate, uid, today, extractYtId, ytThumb, addAttendee, removeAttendee, extraerCodigo, hayHueco, plazoVencido, acompanantes, setAcompanantes } from './utils.js';
 import {
   getEvents, setEvents, getUser, isAdmin, getCode, setCode, getApiUrl, setDevApiUrl, EN_LOCAL, clearSession, lsGet, lsSet,
 } from './store.js';
@@ -137,6 +137,7 @@ const REJECT_MSG = {
   forbidden: 'No tienes permiso para eso',
   not_found: 'Ese plan ya no existe (puede que se haya archivado o borrado)',
   full: '😕 Ese plan está completo: ya no caben más',
+  deadline: '⏳ Ya se acabó el plazo para apuntarse a ese plan',
 };
 
 let lastSyncAt = 0;
@@ -179,7 +180,7 @@ function toggleGoing(id, joining) {
   const events = getEvents();
   const ev = events.find(e => e.id === id);
   if (!ev || !user) return;
-  if (joining && !hayHueco(ev, 1)) { showToast('😕 Ese plan está completo: ya no caben más', 'error'); return; }
+  if (joining && !hayHueco(ev, 1)) { showToast(plazoVencido(ev) ? '⏳ Ya se acabó el plazo para apuntarse a ese plan' : '😕 Ese plan está completo: ya no caben más', 'error'); return; }
   setEvents(events.map(e => (e.id === id
     ? { ...e, asistentes: joining ? addAttendee(e.asistentes, user) : removeAttendee(e.asistentes, user) }
     : e)));
@@ -199,7 +200,7 @@ function cambiarAcompanantes(id, delta) {
   if (actual === null) return;
   const n = Math.max(0, Math.min(20, actual + delta));
   if (n === actual) return;
-  if (delta > 0 && !hayHueco(ev, 1)) { showToast('😕 Ese plan está completo: ya no caben más', 'error'); return; }
+  if (delta > 0 && !hayHueco(ev, 1)) { showToast(plazoVencido(ev) ? '⏳ Ya se acabó el plazo para apuntarse a ese plan' : '😕 Ese plan está completo: ya no caben más', 'error'); return; }
   const texto = setAcompanantes(ev.asistentes, user, n);
   if (texto === null) return;
   setEvents(getEvents().map(e => (e.id === id ? { ...e, asistentes: texto } : e)));
@@ -248,6 +249,9 @@ function openModal(id) {
   $('f-limite').value = ev?.limite || '';
   $('f-limite-wrap').hidden = !ev?.limite;
   $('f-cerrado').checked = !!ev?.cerrado;
+  $('f-plazo-on').checked = !!ev?.fechaLimite;
+  $('f-plazo').value = ev?.fechaLimite || '';
+  $('f-plazo-wrap').hidden = !ev?.fechaLimite;
   previewImg(ev?.imagen || '');
   $('modal-overlay').classList.add('open');
   $('f-evento').focus();
@@ -290,7 +294,10 @@ function saveEvent() {
       tickets: readUrlField('f-tickets', 'Entradas'),
       limite: $('f-limite-on').checked ? Math.floor(Number($('f-limite').value)) || null : null,
       cerrado: $('f-cerrado').checked,
+      fechaLimite: $('f-plazo-on').checked ? $('f-plazo').value : '',
     };
+    if ($('f-plazo-on').checked && !parseDate(data.fechaLimite)) throw new Error('Pon la fecha límite para apuntarse, o desmarca la casilla');
+    if (data.fechaLimite && data.fechaLimite > (data.fechaFin || data.fecha)) throw new Error('La fecha límite no puede ser posterior al plan');
     if ($('f-limite-on').checked && !data.limite) throw new Error('Pon cuántas personas caben, o desmarca el límite');
   } catch (e) {
     showToast(e.message, 'error');
@@ -459,6 +466,7 @@ $('access-form').addEventListener('submit', e => {
   enterWithCode(code);
 });
 initPersonas($('f-asistentes'), $('personas-caja'));
+$('f-plazo-on').addEventListener('change', e => { $('f-plazo-wrap').hidden = !e.target.checked; if (e.target.checked && !$('f-plazo').value) $('f-plazo').value = $('f-fecha').value; });
 $('f-limite-on').addEventListener('change', e => { $('f-limite-wrap').hidden = !e.target.checked; if (e.target.checked) $('f-limite').focus(); });
 $('f-imagen').addEventListener('input', e => previewImg(e.target.value.trim()));
 $('search-input').addEventListener('input', e => { filters.search = e.target.value; renderEvents(); });

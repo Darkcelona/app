@@ -48,7 +48,7 @@ const writeOutbox = list => (list.length ? lsSet(KEYS.outbox, JSON.stringify(lis
 export const pendingCount = () => readOutbox().length;
 
 const keyOf = ev => ({ fecha: ev.fecha, evento: ev.evento });
-const FIELDS = ['fecha', 'fechaFin', 'tipo', 'evento', 'sitio', 'propone', 'previa', 'asistentes', 'imagen', 'youtube', 'tickets', 'limite', 'cerrado'];
+const FIELDS = ['fecha', 'fechaFin', 'tipo', 'evento', 'sitio', 'propone', 'previa', 'asistentes', 'imagen', 'youtube', 'tickets', 'limite', 'cerrado', 'fechaLimite'];
 
 /** Campos que han cambiado entre dos versiones de un evento. */
 export function diffEvent(before, after) {

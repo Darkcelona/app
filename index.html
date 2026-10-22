@@ -208,6 +208,11 @@
         <div id="f-limite-wrap" hidden>
           <input class="form-input" type="number" id="f-limite" min="1" max="1000" inputmode="numeric" placeholder="¿Cuántas personas caben? (con acompañantes)" aria-label="Límite de asistentes">
         </div>
+        <label class="check-line"><input type="checkbox" id="f-plazo-on"> Fecha límite para apuntarse</label>
+        <div id="f-plazo-wrap" hidden>
+          <input class="form-input" type="date" id="f-plazo" aria-label="Último día para apuntarse">
+          <div class="form-hint">Ese día aún se puede; al día siguiente ya nadie puede apuntarse (quitarse sí).</div>
+        </div>
         <label class="check-line"><input type="checkbox" id="f-cerrado"> Completo: ya no caben más (lista cerrada, sold out…)</label>
       </div>
       <div class="form-group full form-media">

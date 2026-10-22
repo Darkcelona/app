@@ -1,5 +1,5 @@
 import { MONTHS_ES, MONTHS_FULL, DAYS_ES, TYPE_ICONS, DEFAULT_TYPES, HISTORY_PAGE, TIPOS_CONCIERTO } from './config.js';
-import { escHtml, safeUrl, parseDate, getAttendees, today, normalizeName, namesOf, extractYtId, ytThumb, formatShortRange, mapsUrl, entradasDeTexto, personasEn, estaCompleto, hayHueco, acompanantes } from './utils.js';
+import { escHtml, safeUrl, parseDate, getAttendees, today, normalizeName, namesOf, extractYtId, ytThumb, formatShortRange, mapsUrl, entradasDeTexto, personasEn, estaCompleto, hayHueco, acompanantes, plazoVencido } from './utils.js';
 import { getEvents, getBares, getUser, hasMe, isAdmin } from './store.js';
 import { historyState } from './api.js';
 import { esNuevo, recientes, marcarVisto, sinVer } from './novedades.js';
@@ -74,6 +74,12 @@ function lugar(icono, texto, extra = '') {
   return `<div class="event-venue ${extra}">${maps ? `<a class="venue-link" href="${escHtml(maps)}" target="_blank" rel="noopener noreferrer" title="Ver en Google Maps">${cuerpo}</a>` : cuerpo}</div>`;
 }
 
+/** "20 oct" a partir de AAAA-MM-DD. */
+function fechaCorta(iso) {
+  const d = parseDate(iso);
+  return d ? `${d.getDate()} ${MONTHS_ES[d.getMonth()]}` : '';
+}
+
 /** Selector de acompañantes (+N) de mi apuntado. */
 function pasos(ev, id) {
   const n = acompanantes(ev.asistentes, getUser());
@@ -88,6 +94,7 @@ export function eventCard(ev, d, todayStr) {
   const mine = hasMe(ev.asistentes);
   const upcoming = isUpcoming(ev, todayStr);
   const completo = estaCompleto(ev);
+  const sinPlazo = plazoVencido(ev, todayStr);
   const icon = TYPE_ICONS[ev.tipo] || '🎸';
   const myNames = namesOf(getUser());
   const id = escHtml(ev.id);
@@ -119,6 +126,7 @@ export function eventCard(ev, d, todayStr) {
 
   const estadoVenta = ESTADOS_VENTA[ev.estadoVenta] ? `<span class="venta-badge venta-${escHtml(ev.estadoVenta)}">${ESTADOS_VENTA[ev.estadoVenta]}</span>` : '';
   const aforo = (ev.limite ? `<span class="limite-badge">👥 Límite ${ev.limite} · ${personas} apuntado${personas === 1 ? '' : 's'}</span>` : '')
+    + (ev.fechaLimite ? (sinPlazo ? '<span class="venta-badge venta-agotado">PLAZO CERRADO</span>' : `<span class="limite-badge">⏳ Apuntarse hasta el ${fechaCorta(ev.fechaLimite)}</span>`) : '')
     + (completo ? '<span class="venta-badge venta-agotado">COMPLETO</span>' : '');
   const badges = aforo + (nuevo ? '<span class="new-badge">✨ NUEVO</span>' : '') + estadoVenta + (ev.fecha === todayStr || (ev.fechaFin && ev.fecha <= todayStr && ev.fechaFin >= todayStr)
     ? '<span class="upcoming-badge">HOY</span>'
@@ -126,6 +134,8 @@ export function eventCard(ev, d, todayStr) {
 
   const joinBtn = !upcoming ? '' : mine
     ? `<button class="btn-join joined" data-action="leave" data-id="${id}">✓ Voy · Quitarme</button>${pasos(ev, id)}<button class="btn-join btn-cal" data-action="calendar" data-id="${id}" title="Añadir a mi calendario" aria-label="Añadir a mi calendario">📅</button>`
+    : sinPlazo
+      ? '<button class="btn-join" disabled title="Se acabó el plazo para apuntarse">🔒 Plazo cerrado</button>'
     : completo
       ? '<button class="btn-join" disabled title="Ya no caben más">🔒 Completo</button>'
       : `<button class="btn-join" data-action="join" data-id="${id}">＋ Apuntarme</button>`;

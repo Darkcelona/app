@@ -309,10 +309,12 @@ export function personasEn(text) {
   return n;
 }
 
-/** ¿Hay sitio para `extra` personas más? (false si está marcado como completo o se pasaría del límite). */
-export const hayHueco = (ev, extra = 1) => !ev.cerrado && !(ev.limite && personasEn(ev.asistentes) + extra > ev.limite);
-/** Completo: marcado a mano o ya sin hueco para una persona más. */
-export const estaCompleto = ev => !hayHueco(ev, 1);
+/** Plazo para apuntarse vencido: a partir del día siguiente a la fecha límite (ese día aún se puede). */
+export const plazoVencido = (ev, hoy = today()) => !!ev.fechaLimite && hoy > ev.fechaLimite;
+/** ¿Hay sitio para `extra` personas más? (false si está marcado como completo, se pasaría del límite o se acabó el plazo). */
+export const hayHueco = (ev, extra = 1) => !plazoVencido(ev) && !ev.cerrado && !(ev.limite && personasEn(ev.asistentes) + extra > ev.limite);
+/** Completo: marcado a mano o ya sin hueco para una persona más (sin contar el plazo). */
+export const estaCompleto = ev => !!ev.cerrado || !!(ev.limite && personasEn(ev.asistentes) + 1 > ev.limite);
 
 function lineaDe(text, names) {
   const lines = String(text || '').split('\n');

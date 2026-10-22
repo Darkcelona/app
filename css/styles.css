@@ -705,6 +705,7 @@
   .plus-step button { border: none; background: none; color: var(--gold); font-size: 17px; font-weight: 700; padding: 6px 10px; cursor: pointer; }
   .plus-step button:disabled { opacity: .3; cursor: not-allowed; }
   .plus-n { min-width: 24px; text-align: center; font-weight: 700; font-size: 14px; }
+  .form-hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
   .aforo-grupo { display: flex; flex-direction: column; gap: 8px; }
   .check-line { display: flex; align-items: center; gap: 8px; font-size: 14px; cursor: pointer; }
   .check-line input { width: 18px; height: 18px; accent-color: var(--red); }
