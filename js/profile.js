@@ -1,5 +1,5 @@
 import { MONTHS_ES, TYPE_ICONS } from './config.js';
-import { escHtml, parseDate, today, getAttendees } from './utils.js';
+import { escHtml, parseDate, today, getAttendees, mapsUrl } from './utils.js';
 import { getEvents, getMyHistory, getUser, hasMe, isAdmin } from './store.js';
 import { isUpcoming } from './render.js';
 import { preferenciaCalendario } from './calendario.js';
@@ -16,6 +16,15 @@ function asistentesFila(ev, past) {
   return `<div class="plan-sub plan-asistentes">👥 ${a.length}: ${lista}</div>`;
 }
 
+/** " · 📍 Sitio" con enlace a Google Maps (como en las tarjetas de Quedadas). */
+function sitioHtml(sitio) {
+  const t = String(sitio || '').trim();
+  if (!t) return '';
+  const maps = mapsUrl(t);
+  const cuerpo = '📍 ' + escHtml(t);
+  return ' · ' + (maps ? `<a class="venue-link" href="${escHtml(maps)}" target="_blank" rel="noopener noreferrer" title="Ver en Google Maps">${cuerpo}</a>` : cuerpo);
+}
+
 function planRow(ev, past) {
   const d = parseDate(ev.fecha);
   if (!d) return '';
@@ -24,7 +33,7 @@ function planRow(ev, past) {
     <div class="plan-date"><strong>${d.getDate()}</strong><span>${MONTHS_ES[d.getMonth()]}${past ? ' ' + String(d.getFullYear()).slice(2) : ''}</span></div>
     <div class="plan-main">
       <div class="plan-title">${TYPE_ICONS[ev.tipo] || '🎸'} ${escHtml(ev.evento)}</div>
-      <div class="plan-sub">${escHtml(ev.tipo || '')}${ev.sitio ? ' · 📍 ' + escHtml(ev.sitio) : ''}</div>
+      <div class="plan-sub">${escHtml(ev.tipo || '')}${sitioHtml(ev.sitio)}</div>
       ${!past && ev.previa ? `<div class="plan-sub plan-previa">🍺 Previa: ${escHtml(ev.previa)}</div>` : ''}
       ${asistentesFila(ev, past)}
     </div>
