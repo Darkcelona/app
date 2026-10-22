@@ -43,10 +43,10 @@ export function allTypes() {
 export function renderFilterChips() {
   const present = new Set(getEvents().map(e => e.tipo));
   const types = allTypes().filter(t => present.has(t));
-  if (filters.type !== 'all' && filters.type !== 'mine' && !types.includes(filters.type)) filters.type = 'all';
+  if (filters.type !== 'all' && filters.type !== 'mine' && filters.type !== 'flag' && !types.includes(filters.type)) filters.type = 'all';
   const chip = (value, label) =>
     `<button class="filter-chip${filters.type === value ? ' active' : ''}" data-filter="${escHtml(value)}">${label}</button>`;
-  $('filters').innerHTML = chip('all', 'Todos') + types.map(t => chip(t, escHtml(t))).join('') + chip('mine', '⚡ Mis planes');
+  $('filters').innerHTML = chip('all', 'Todos') + types.map(t => chip(t, escHtml(t))).join('') + chip('mine', '⚡ Mis planes') + (getEvents().some(e => e.interes && !hasMe(e.asistentes) && isUpcoming(e)) ? chip('flag', '🚩 Me interesan') : '');
 }
 
 export function fillTypeSelect(current) {
@@ -153,6 +153,7 @@ export function eventCard(ev, d, todayStr) {
             ${ev.previa ? `<div class="event-venue event-previa">🍺 Previa: ${escHtml(ev.previa)}</div>` : ''}
           </div>
           <div class="event-actions">
+            ${upcoming && !mine ? `<button class="btn-sm btn-flag${ev.interes ? ' on' : ''}" data-action="flag" data-id="${id}" title="${ev.interes ? 'Quitar la bandera' : 'Me interesa (no sé si ir)'}" aria-label="Bandera: me interesa" aria-pressed="${ev.interes ? 'true' : 'false'}">${ev.interes ? '🚩' : '⚑'}</button>` : ''}
             <button class="btn-sm" data-action="edit" data-id="${id}" aria-label="Editar evento">✏️</button>
             ${isAdmin() || ev.mio ? `<button class="btn-sm del" data-action="delete" data-id="${id}" aria-label="Eliminar evento">🗑️</button>` : ''}
           </div>
@@ -180,7 +181,9 @@ export function renderEvents() {
   renderFilterChips();
 
   const filtered = events.filter(e => {
-    if (filters.type === 'mine') {
+    if (filters.type === 'flag') {
+      if (!e.interes || hasMe(e.asistentes)) return false;
+    } else if (filters.type === 'mine') {
       if (!hasMe(e.asistentes)) return false;
     } else if (filters.type !== 'all' && e.tipo !== filters.type) {
       return false;

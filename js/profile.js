@@ -1,5 +1,5 @@
 import { MONTHS_ES, TYPE_ICONS } from './config.js';
-import { escHtml, parseDate, today, getAttendees, mapsUrl, personasEn } from './utils.js';
+import { escHtml, parseDate, today, getAttendees, mapsUrl, personasEn, hayHueco } from './utils.js';
 import { getEvents, getMyHistory, getUser, hasMe, isAdmin } from './store.js';
 import { isUpcoming } from './render.js';
 import { preferenciaCalendario } from './calendario.js';
@@ -26,19 +26,23 @@ function sitioHtml(sitio) {
   return ' · ' + (maps ? `<a class="venue-link" href="${escHtml(maps)}" target="_blank" rel="noopener noreferrer" title="Ver en Google Maps">${cuerpo}</a>` : cuerpo);
 }
 
-function planRow(ev, past) {
+function planRow(ev, past, interes = false) {
   const d = parseDate(ev.fecha);
   if (!d) return '';
   return `
   <div class="plan-row${past ? ' past' : ''}">
     <div class="plan-date"><strong>${d.getDate()}</strong><span>${MONTHS_ES[d.getMonth()]}${past ? ' ' + String(d.getFullYear()).slice(2) : ''}</span></div>
     <div class="plan-main">
-      <div class="plan-title">${TYPE_ICONS[ev.tipo] || '🎸'} ${escHtml(ev.evento)}</div>
+      <div class="plan-title">${TYPE_ICONS[ev.tipo] || '🎸'} ${escHtml(ev.evento)}${interes ? ' <span class="flag-tag">🚩 Me interesa</span>' : ''}</div>
       <div class="plan-sub">${escHtml(ev.tipo || '')}${sitioHtml(ev.sitio)}</div>
       ${!past && ev.previa ? `<div class="plan-sub plan-previa">🍺 Previa: ${escHtml(ev.previa)}</div>` : ''}
       ${asistentesFila(ev, past)}
     </div>
-    ${past || !ev.id ? '' : `<div class="plan-acciones">
+    ${interes && ev.id ? `<div class="plan-acciones">
+      ${hayHueco(ev, 1) ? `<button class="btn-sm" data-action="join" data-id="${escHtml(ev.id)}">＋ Apuntarme</button>` : ''}
+      <button class="btn-sm" data-action="flag" data-id="${escHtml(ev.id)}">Quitar 🚩</button>
+    </div>` : ''}
+    ${past || interes || !ev.id ? '' : `<div class="plan-acciones">
       <button class="btn-sm" data-action="calendar" data-id="${escHtml(ev.id)}" title="Añadir a mi calendario" aria-label="Añadir a mi calendario">📅</button>
       <button class="btn-sm" data-action="leave" data-id="${escHtml(ev.id)}">Quitarme</button>
     </div>`}
@@ -58,6 +62,7 @@ export function renderProfile(historyReady) {
   if (!user) { $('profile-view').innerHTML = ''; return; }
   const todayStr = today();
   const next = getEvents().filter(e => isUpcoming(e, todayStr) && hasMe(e.asistentes)).sort((a, b) => a.fecha.localeCompare(b.fecha));
+  const interesados = getEvents().filter(e => isUpcoming(e, todayStr) && e.interes && !hasMe(e.asistentes));
   const past = myPastEvents();
   const thisYear = String(new Date().getFullYear());
   const byYear = {};
@@ -82,8 +87,8 @@ export function renderProfile(historyReady) {
       <div class="stat-card"><div class="stat-num">${byYear[thisYear] || 0}</div><div class="stat-label">Este año</div></div>
     </div>
 
-    <div class="section-title">🗓️ Mis próximos planes <span class="event-count">${next.length}</span></div>
-    ${next.length ? next.map(e => planRow(e, false)).join('') : vacioHTML('triste', 'No estás apuntado a nada todavía. Ve a Quedadas y pulsa "Apuntarme".', { pequeno: true, una: true })}
+    <div class="section-title">🗓️ Mis próximos planes <span class="event-count">${next.length}</span>${interesados.length ? ` <span class="event-count" title="Planes con bandera: me interesan pero no sé si voy">🚩 ${interesados.length}</span>` : ''}</div>
+    ${next.length || interesados.length ? [...next.map(e => ({ e, i: false })), ...interesados.map(e => ({ e, i: true }))].sort((a, b) => a.e.fecha.localeCompare(b.e.fecha)).map(({ e, i }) => planRow(e, false, i)).join('') : vacioHTML('triste', 'No estás apuntado a nada todavía. Ve a Quedadas y pulsa "Apuntarme".', { pequeno: true, una: true })}
 
     <div class="section-title">📜 Mi historial <span class="event-count">${past.length}</span></div>
     ${years.length ? `<div class="year-chips">${years.map(y => `<span class="attendee-chip">${y}: <strong>${byYear[y]}</strong></span>`).join('')}</div>` : ''}

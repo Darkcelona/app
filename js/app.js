@@ -14,7 +14,7 @@ import { initListas, abrirLista, cerrarLista, guardarLista, borrarLista } from '
 import { loadAdmin, adminAction, adminCreate, setLogFilter } from './admin.js';
 import {
   AuthError, isConfigured, isLoggedIn, syncNow, loadHistoryPage, loadMyHistory, pendingCount,
-  queueUpsert, queueDelete, queueJoin, queueLeave, queuePlus, diffEvent,
+  queueUpsert, queueDelete, queueJoin, queueLeave, queuePlus, queueFlag, diffEvent,
 } from './api.js';
 import { $, showToast } from './ui.js';
 import { celebrar, mascotaHTML } from './mascota.js';
@@ -189,6 +189,18 @@ function toggleGoing(id, joining) {
   showToast(joining ? '🤘 ¡Apuntado!' : 'Te has quitado del plan');
   scheduleFlush();
   if (joining) celebrar();
+}
+
+/** Bandera "me interesa": marcar o desmarcar (privado; aparece en mi Perfil). */
+function toggleInteres(id) {
+  const ev = getEvents().find(e => e.id === id);
+  if (!ev || !getUser()) return;
+  const on = !ev.interes;
+  setEvents(getEvents().map(e => (e.id === id ? { ...e, interes: on } : e)));
+  queueFlag(ev, on);
+  renderAll();
+  showToast(on ? '🚩 Marcado: lo tienes en tu Perfil' : 'Bandera quitada');
+  scheduleFlush();
 }
 
 /** Sube o baja mis acompañantes (+N) en un plan al que voy. */
@@ -410,6 +422,7 @@ const actions = {
   'join': el => toggleGoing(el.dataset.id, true),
   'leave': el => toggleGoing(el.dataset.id, false),
   'toggle': el => toggleAttendees(el),
+  'flag': el => toggleInteres(el.dataset.id),
   'plus-mas': el => cambiarAcompanantes(el.dataset.id, 1),
   'plus-menos': el => cambiarAcompanantes(el.dataset.id, -1),
   'sync': () => runSync(true),

@@ -93,6 +93,12 @@ export function queuePlus(event, n) {
   box.push({ id: event.id, op: 'plus', match: keyOf(event), n });
   writeOutbox(box);
 }
+/** Bandera "me interesa" (privada). Solo cuenta el último valor pendiente de cada plan. */
+export function queueFlag(event, on) {
+  const box = readOutbox().filter(e => !(e.op === 'flag' && e.id === event.id));
+  box.push({ id: event.id, op: 'flag', match: keyOf(event), on });
+  writeOutbox(box);
+}
 export const queueJoin = ev => queueToggle(ev, 'join', 'leave');
 export const queueLeave = ev => queueToggle(ev, 'leave', 'join');
 
@@ -105,6 +111,11 @@ function overlay(list, box, user) {
       out = out.map(ev => (eventKey(ev) === k && user
         ? { ...ev, asistentes: e.op === 'join' ? addAttendee(ev.asistentes, user) : removeAttendee(ev.asistentes, user) }
         : ev));
+      continue;
+    }
+    if (e.op === 'flag') {
+      const k = eventKey(e.match);
+      out = out.map(ev => (eventKey(ev) === k ? { ...ev, interes: !!e.on } : ev));
       continue;
     }
     if (e.op === 'plus') {
@@ -137,7 +148,7 @@ export function syncNow() {
   busy = (async () => {
     const box = readOutbox();
     const sent = new Set(box.map(e => JSON.stringify(e)));
-    const json = await post({ action: 'sync', ops: box.map(({ op, match, event, changes, n }) => ({ op, match, event, changes, n })) });
+    const json = await post({ action: 'sync', ops: box.map(({ op, match, event, changes, n, on }) => ({ op, match, event, changes, n, on })) });
 
     // Se retiran solo las entradas enviadas tal cual; las creadas o editadas durante la petición siguen en cola.
     writeOutbox(readOutbox().filter(e => !sent.has(JSON.stringify(e))));
