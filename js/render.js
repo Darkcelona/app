@@ -1,5 +1,5 @@
 import { MONTHS_ES, MONTHS_FULL, DAYS_ES, TYPE_ICONS, DEFAULT_TYPES, HISTORY_PAGE, TIPOS_CONCIERTO } from './config.js';
-import { escHtml, safeUrl, parseDate, getAttendees, today, normalizeName, namesOf, extractYtId, ytThumb, formatShortRange, mapsUrl, entradasDeTexto } from './utils.js';
+import { escHtml, safeUrl, parseDate, getAttendees, today, normalizeName, namesOf, extractYtId, ytThumb, formatShortRange, mapsUrl, entradasDeTexto, personasEn, estaCompleto, hayHueco, acompanantes } from './utils.js';
 import { getEvents, getBares, getUser, hasMe, isAdmin } from './store.js';
 import { historyState } from './api.js';
 import { esNuevo, recientes, marcarVisto, sinVer } from './novedades.js';
@@ -74,11 +74,20 @@ function lugar(icono, texto, extra = '') {
   return `<div class="event-venue ${extra}">${maps ? `<a class="venue-link" href="${escHtml(maps)}" target="_blank" rel="noopener noreferrer" title="Ver en Google Maps">${cuerpo}</a>` : cuerpo}</div>`;
 }
 
+/** Selector de acompañantes (+N) de mi apuntado. */
+function pasos(ev, id) {
+  const n = acompanantes(ev.asistentes, getUser());
+  if (n === null) return '';
+  return `<span class="plus-step" title="Personas que vienen contigo"><button data-action="plus-menos" data-id="${id}" aria-label="Un acompañante menos"${n ? '' : ' disabled'}>−</button><span class="plus-n">${n ? '+' + n : '+0'}</span><button data-action="plus-mas" data-id="${id}" aria-label="Un acompañante más"${hayHueco(ev, 1) ? '' : ' disabled'}>＋</button></span>`;
+}
+
 export function eventCard(ev, d, todayStr) {
   const nuevo = esNuevo(ev);
   const attendees = getAttendees(ev.asistentes);
+  const personas = personasEn(ev.asistentes);
   const mine = hasMe(ev.asistentes);
   const upcoming = isUpcoming(ev, todayStr);
+  const completo = estaCompleto(ev);
   const icon = TYPE_ICONS[ev.tipo] || '🎸';
   const myNames = namesOf(getUser());
   const id = escHtml(ev.id);
@@ -109,13 +118,17 @@ export function eventCard(ev, d, todayStr) {
   ).join('');
 
   const estadoVenta = ESTADOS_VENTA[ev.estadoVenta] ? `<span class="venta-badge venta-${escHtml(ev.estadoVenta)}">${ESTADOS_VENTA[ev.estadoVenta]}</span>` : '';
-  const badges = (nuevo ? '<span class="new-badge">✨ NUEVO</span>' : '') + estadoVenta + (ev.fecha === todayStr || (ev.fechaFin && ev.fecha <= todayStr && ev.fechaFin >= todayStr)
+  const aforo = (ev.limite ? `<span class="limite-badge">👥 Límite ${ev.limite} · ${personas} apuntado${personas === 1 ? '' : 's'}</span>` : '')
+    + (completo ? '<span class="venta-badge venta-agotado">COMPLETO</span>' : '');
+  const badges = aforo + (nuevo ? '<span class="new-badge">✨ NUEVO</span>' : '') + estadoVenta + (ev.fecha === todayStr || (ev.fechaFin && ev.fecha <= todayStr && ev.fechaFin >= todayStr)
     ? '<span class="upcoming-badge">HOY</span>'
     : '');
 
   const joinBtn = !upcoming ? '' : mine
-    ? `<button class="btn-join joined" data-action="leave" data-id="${id}">✓ Voy · Quitarme</button><button class="btn-join btn-cal" data-action="calendar" data-id="${id}" title="Añadir a mi calendario" aria-label="Añadir a mi calendario">📅</button>`
-    : `<button class="btn-join" data-action="join" data-id="${id}">＋ Apuntarme</button>`;
+    ? `<button class="btn-join joined" data-action="leave" data-id="${id}">✓ Voy · Quitarme</button>${pasos(ev, id)}<button class="btn-join btn-cal" data-action="calendar" data-id="${id}" title="Añadir a mi calendario" aria-label="Añadir a mi calendario">📅</button>`
+    : completo
+      ? '<button class="btn-join" disabled title="Ya no caben más">🔒 Completo</button>'
+      : `<button class="btn-join" data-action="join" data-id="${id}">＋ Apuntarme</button>`;
 
   return `
   <article class="event-card${mine ? ' omar-event' : ''}${nuevo ? ' is-new' : ''}" data-id="${id}">
@@ -141,7 +154,7 @@ export function eventCard(ev, d, todayStr) {
         </div>
         <div class="event-foot">
           ${joinBtn}
-          <button class="event-card-toggle" data-action="toggle" data-count="${attendees.length}" aria-expanded="false">Ver asistentes (${attendees.length}) ▾</button>
+          <button class="event-card-toggle" data-action="toggle" data-count="${personas}" aria-expanded="false">Ver asistentes (${personas}) ▾</button>
         </div>
       </div>
     </div>

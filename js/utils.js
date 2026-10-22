@@ -293,3 +293,46 @@ export function calendarioIcs(ev, appUrl = '', ahora = new Date()) {
   lineas.push('END:VEVENT', 'END:VCALENDAR');
   return lineas.map(icsLinea).join('\r\n') + '\r\n';
 }
+
+// ── Personas, acompañantes ("+N") y aforo ────────────────
+const NO_PERSONA = /(ap[uú]ntate|formulario|cerrad|pendiente|sold ?out|aforo|reserva|m[aá]ximo|lista|plazas|completa)/i;
+
+/** Cuántas personas hay: una por línea que parezca un nombre (se saltan encabezados, "LISTA CERRADA"...), más los "+N" de cada línea. */
+export function personasEn(text) {
+  let n = 0;
+  for (const raw of String(text || '').split('\n')) {
+    const l = raw.trim().replace(/^\d+\s*[.)\-]\s*/, '').trim();
+    if (!l || l.length > 45 || l.endsWith(':') || NO_PERSONA.test(l) || !/[a-zA-Z\u00c0-\u024f]/.test(l)) continue;
+    n += 1;
+    for (const m of l.matchAll(/\+\s*(\d{1,2})\b/g)) n += Number(m[1]);
+  }
+  return n;
+}
+
+/** ¿Hay sitio para `extra` personas más? (false si está marcado como completo o se pasaría del límite). */
+export const hayHueco = (ev, extra = 1) => !ev.cerrado && !(ev.limite && personasEn(ev.asistentes) + extra > ev.limite);
+/** Completo: marcado a mano o ya sin hueco para una persona más. */
+export const estaCompleto = ev => !hayHueco(ev, 1);
+
+function lineaDe(text, names) {
+  const lines = String(text || '').split('\n');
+  const i = lines.findIndex(l => !l.includes(',') && names.includes(normalizeName(l)));
+  return { lines, i };
+}
+
+/** Acompañantes que llevo (el "+N" de mi línea), o null si no estoy apuntado en una línea propia. */
+export function acompanantes(text, user) {
+  const { lines, i } = lineaDe(text, namesOf(user));
+  if (i < 0) return null;
+  const m = lines[i].match(/\+\s*(\d{1,2})\b/);
+  return m ? Number(m[1]) : 0;
+}
+
+/** El texto de asistentes con mi "+N" cambiado; null si no se puede. */
+export function setAcompanantes(text, user, n) {
+  const { lines, i } = lineaDe(text, namesOf(user));
+  if (i < 0) return null;
+  const base = lines[i].replace(/\s*\(?\+\s*\d+\)?\s*$/, '').trim();
+  lines[i] = n > 0 ? `${base} + ${n}` : base;
+  return lines.join('\n');
+}

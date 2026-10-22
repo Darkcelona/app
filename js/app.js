@@ -1,5 +1,5 @@
 import { APP_VERSION, SYNC_MIN_INTERVAL_MS } from './config.js';
-import { safeUrl, parseDate, uid, today, extractYtId, ytThumb, addAttendee, removeAttendee, extraerCodigo } from './utils.js';
+import { safeUrl, parseDate, uid, today, extractYtId, ytThumb, addAttendee, removeAttendee, extraerCodigo, hayHueco, acompanantes, setAcompanantes } from './utils.js';
 import {
   getEvents, setEvents, getUser, isAdmin, getCode, setCode, getApiUrl, setDevApiUrl, EN_LOCAL, clearSession, lsGet, lsSet,
 } from './store.js';
@@ -14,7 +14,7 @@ import { initListas, abrirLista, cerrarLista, guardarLista, borrarLista } from '
 import { loadAdmin, adminAction, adminCreate, setLogFilter } from './admin.js';
 import {
   AuthError, isConfigured, isLoggedIn, syncNow, loadHistoryPage, loadMyHistory, pendingCount,
-  queueUpsert, queueDelete, queueJoin, queueLeave, diffEvent,
+  queueUpsert, queueDelete, queueJoin, queueLeave, queuePlus, diffEvent,
 } from './api.js';
 import { $, showToast } from './ui.js';
 import { celebrar, mascotaHTML } from './mascota.js';
@@ -136,6 +136,7 @@ function updateSyncBar(state, msg) {
 const REJECT_MSG = {
   forbidden: 'No tienes permiso para eso',
   not_found: 'Ese plan ya no existe (puede que se haya archivado o borrado)',
+  full: '😕 Ese plan está completo: ya no caben más',
 };
 
 let lastSyncAt = 0;
@@ -178,6 +179,7 @@ function toggleGoing(id, joining) {
   const events = getEvents();
   const ev = events.find(e => e.id === id);
   if (!ev || !user) return;
+  if (joining && !hayHueco(ev, 1)) { showToast('😕 Ese plan está completo: ya no caben más', 'error'); return; }
   setEvents(events.map(e => (e.id === id
     ? { ...e, asistentes: joining ? addAttendee(e.asistentes, user) : removeAttendee(e.asistentes, user) }
     : e)));
@@ -186,6 +188,24 @@ function toggleGoing(id, joining) {
   showToast(joining ? '🤘 ¡Apuntado!' : 'Te has quitado del plan');
   scheduleFlush();
   if (joining) celebrar();
+}
+
+/** Sube o baja mis acompañantes (+N) en un plan al que voy. */
+function cambiarAcompanantes(id, delta) {
+  const user = getUser();
+  const ev = getEvents().find(e => e.id === id);
+  if (!user || !ev) return;
+  const actual = acompanantes(ev.asistentes, user);
+  if (actual === null) return;
+  const n = Math.max(0, Math.min(20, actual + delta));
+  if (n === actual) return;
+  if (delta > 0 && !hayHueco(ev, 1)) { showToast('😕 Ese plan está completo: ya no caben más', 'error'); return; }
+  const texto = setAcompanantes(ev.asistentes, user, n);
+  if (texto === null) return;
+  setEvents(getEvents().map(e => (e.id === id ? { ...e, asistentes: texto } : e)));
+  queuePlus(ev, n);
+  renderAll();
+  scheduleFlush();
 }
 
 // ── Modal de evento ─────────────────────────────────────
@@ -224,6 +244,10 @@ function openModal(id) {
   $('f-imagen').value = ev?.imagen || '';
   $('f-youtube').value = ev?.youtube || '';
   $('f-tickets').value = ev?.tickets || '';
+  $('f-limite-on').checked = !!ev?.limite;
+  $('f-limite').value = ev?.limite || '';
+  $('f-limite-wrap').hidden = !ev?.limite;
+  $('f-cerrado').checked = !!ev?.cerrado;
   previewImg(ev?.imagen || '');
   $('modal-overlay').classList.add('open');
   $('f-evento').focus();
@@ -264,7 +288,10 @@ function saveEvent() {
       imagen: readUrlField('f-imagen', 'Imagen'),
       youtube: readUrlField('f-youtube', 'YouTube'),
       tickets: readUrlField('f-tickets', 'Entradas'),
+      limite: $('f-limite-on').checked ? Math.floor(Number($('f-limite').value)) || null : null,
+      cerrado: $('f-cerrado').checked,
     };
+    if ($('f-limite-on').checked && !data.limite) throw new Error('Pon cuántas personas caben, o desmarca el límite');
   } catch (e) {
     showToast(e.message, 'error');
     return;
@@ -376,6 +403,8 @@ const actions = {
   'join': el => toggleGoing(el.dataset.id, true),
   'leave': el => toggleGoing(el.dataset.id, false),
   'toggle': el => toggleAttendees(el),
+  'plus-mas': el => cambiarAcompanantes(el.dataset.id, 1),
+  'plus-menos': el => cambiarAcompanantes(el.dataset.id, -1),
   'sync': () => runSync(true),
   'goto-profile': () => selectTab('perfil'),
   'goto-novedades': () => selectTab('novedades'),
@@ -430,6 +459,7 @@ $('access-form').addEventListener('submit', e => {
   enterWithCode(code);
 });
 initPersonas($('f-asistentes'), $('personas-caja'));
+$('f-limite-on').addEventListener('change', e => { $('f-limite-wrap').hidden = !e.target.checked; if (e.target.checked) $('f-limite').focus(); });
 $('f-imagen').addEventListener('input', e => previewImg(e.target.value.trim()));
 $('search-input').addEventListener('input', e => { filters.search = e.target.value; renderEvents(); });
 // La búsqueda del historial la hace el servidor; se espera a que la persona deje de escribir para no preguntar en cada tecla.

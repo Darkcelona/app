@@ -5,7 +5,7 @@
 //  · Al leer, el Excel manda y encima se re-aplican los cambios aún pendientes, para que la pantalla no "salte".
 import { KEYS, SYNC_TIMEOUT_MS, HISTORY_PAGE } from './config.js';
 import { lsGet, lsSet, lsRemove, getCode, getApiUrl, setUser, setEvents, setBares, setCumples, setGrupos, getHistoryP1, setHistoryP1, setMyHistory } from './store.js';
-import { assignIds, eventKey, addAttendee, removeAttendee } from './utils.js';
+import { assignIds, eventKey, addAttendee, removeAttendee, setAcompanantes } from './utils.js';
 
 export class AuthError extends Error {}
 
@@ -48,12 +48,16 @@ const writeOutbox = list => (list.length ? lsSet(KEYS.outbox, JSON.stringify(lis
 export const pendingCount = () => readOutbox().length;
 
 const keyOf = ev => ({ fecha: ev.fecha, evento: ev.evento });
-const FIELDS = ['fecha', 'fechaFin', 'tipo', 'evento', 'sitio', 'propone', 'previa', 'asistentes', 'imagen', 'youtube', 'tickets'];
+const FIELDS = ['fecha', 'fechaFin', 'tipo', 'evento', 'sitio', 'propone', 'previa', 'asistentes', 'imagen', 'youtube', 'tickets', 'limite', 'cerrado'];
 
 /** Campos que han cambiado entre dos versiones de un evento. */
 export function diffEvent(before, after) {
   const changes = {};
-  for (const f of FIELDS) if ((before[f] || '') !== (after[f] || '')) changes[f] = after[f] || '';
+  for (const f of FIELDS) {
+    if (f === 'limite') { if ((before.limite ?? null) !== (after.limite ?? null)) changes.limite = after.limite ?? null; }
+    else if (f === 'cerrado') { if (!!before.cerrado !== !!after.cerrado) changes.cerrado = !!after.cerrado; }
+    else if ((before[f] || '') !== (after[f] || '')) changes[f] = after[f] || '';
+  }
   return changes;
 }
 
@@ -83,6 +87,12 @@ function queueToggle(event, op, opposite) {
   else box.push({ id: event.id, op, match: keyOf(event) });
   writeOutbox(box);
 }
+/** Cambia mis acompañantes ("+N"). Solo cuenta el último valor pendiente de cada plan. */
+export function queuePlus(event, n) {
+  const box = readOutbox().filter(e => !(e.op === 'plus' && e.id === event.id));
+  box.push({ id: event.id, op: 'plus', match: keyOf(event), n });
+  writeOutbox(box);
+}
 export const queueJoin = ev => queueToggle(ev, 'join', 'leave');
 export const queueLeave = ev => queueToggle(ev, 'leave', 'join');
 
@@ -95,6 +105,14 @@ function overlay(list, box, user) {
       out = out.map(ev => (eventKey(ev) === k && user
         ? { ...ev, asistentes: e.op === 'join' ? addAttendee(ev.asistentes, user) : removeAttendee(ev.asistentes, user) }
         : ev));
+      continue;
+    }
+    if (e.op === 'plus') {
+      const k = eventKey(e.match);
+      out = out.map(ev => {
+        const t = eventKey(ev) === k && user ? setAcompanantes(ev.asistentes, user, e.n) : null;
+        return t === null ? ev : { ...ev, asistentes: t };
+      });
       continue;
     }
     const keys = new Set();
@@ -119,7 +137,7 @@ export function syncNow() {
   busy = (async () => {
     const box = readOutbox();
     const sent = new Set(box.map(e => JSON.stringify(e)));
-    const json = await post({ action: 'sync', ops: box.map(({ op, match, event, changes }) => ({ op, match, event, changes })) });
+    const json = await post({ action: 'sync', ops: box.map(({ op, match, event, changes, n }) => ({ op, match, event, changes, n })) });
 
     // Se retiran solo las entradas enviadas tal cual; las creadas o editadas durante la petición siguen en cola.
     writeOutbox(readOutbox().filter(e => !sent.has(JSON.stringify(e))));

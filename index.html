@@ -203,6 +203,13 @@
         <textarea class="form-input" id="f-asistentes" placeholder="Escribe @ y el nombre…&#10;Omar&#10;Berta"></textarea>
         <div class="personas-caja" id="personas-caja" hidden></div>
       </div>
+      <div class="form-group full aforo-grupo">
+        <label class="check-line"><input type="checkbox" id="f-limite-on"> Tiene límite de asistentes</label>
+        <div id="f-limite-wrap" hidden>
+          <input class="form-input" type="number" id="f-limite" min="1" max="1000" inputmode="numeric" placeholder="¿Cuántas personas caben? (con acompañantes)" aria-label="Límite de asistentes">
+        </div>
+        <label class="check-line"><input type="checkbox" id="f-cerrado"> Completo: ya no caben más (lista cerrada, sold out…)</label>
+      </div>
       <div class="form-group full form-media">
         <label class="form-label" for="f-imagen">🖼️ Imagen del evento</label>
         <input class="form-input" type="url" id="f-imagen" placeholder="https://... URL de imagen del concierto o cartel">

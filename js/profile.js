@@ -1,5 +1,5 @@
 import { MONTHS_ES, TYPE_ICONS } from './config.js';
-import { escHtml, parseDate, today, getAttendees, mapsUrl } from './utils.js';
+import { escHtml, parseDate, today, getAttendees, mapsUrl, personasEn } from './utils.js';
 import { getEvents, getMyHistory, getUser, hasMe, isAdmin } from './store.js';
 import { isUpcoming } from './render.js';
 import { preferenciaCalendario } from './calendario.js';
@@ -12,8 +12,9 @@ export const profileState = { pastLimit: 30 };
 function asistentesFila(ev, past) {
   const a = getAttendees(ev.asistentes);
   if (a.length < 2) return '';
+  const total = personasEn(ev.asistentes);
   const lista = past && a.length > 8 ? a.slice(0, 8).map(escHtml).join(', ') + ` y ${a.length - 8} más` : a.map(escHtml).join(', ');
-  return `<div class="plan-sub plan-asistentes">👥 ${a.length}: ${lista}</div>`;
+  return `<div class="plan-sub plan-asistentes">👥 ${total}: ${lista}</div>`;
 }
 
 /** " · 📍 Sitio" con enlace a Google Maps (como en las tarjetas de Quedadas). */
