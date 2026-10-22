@@ -49,6 +49,7 @@ function applyUserUI() {
 function logout(msg) {
   clearSession();
   profileState.pastLimit = 30;
+  profileState.filtro = '';
   renderAll();
   applyUserUI();
   selectTab('quedadas');
@@ -439,6 +440,7 @@ const actions = {
     try { const p = loadHistoryPage(false); pintar(); await p; } catch (err) { if (err instanceof AuthError) return handleAuthLost(); }
     pintar();
   },
+  'perfil-filtro': el => { profileState.filtro = profileState.filtro === el.dataset.f ? '' : el.dataset.f; renderProfile(true); },
   'profile-more': () => { profileState.pastLimit += 30; renderProfile(true); },
   'logout': () => { if (confirm('¿Cerrar sesión en este dispositivo? Tendrás que volver a entrar con tu enlace personal.')) logout('Has cerrado sesión.'); },
   'install': installPWA,

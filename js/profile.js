@@ -6,7 +6,7 @@ import { preferenciaCalendario } from './calendario.js';
 import { vacioHTML } from './mascota.js';
 
 const $ = id => document.getElementById(id);
-export const profileState = { pastLimit: 30 };
+export const profileState = { pastLimit: 30, filtro: '' };   // filtro de "Mis próximos planes": '' (todos) | 'voy' | 'bandera'
 
 /** Quién más va (en los pasados, solo los primeros: pueden ser muchos). */
 function asistentesFila(ev, past) {
@@ -62,6 +62,7 @@ export function renderProfile(historyReady) {
   if (!user) { $('profile-view').innerHTML = ''; return; }
   const todayStr = today();
   const next = getEvents().filter(e => isUpcoming(e, todayStr) && hasMe(e.asistentes)).sort((a, b) => a.fecha.localeCompare(b.fecha));
+  const filtro = profileState.filtro === 'bandera' && !getEvents().some(e => isUpcoming(e, todayStr) && e.interes && !hasMe(e.asistentes)) ? '' : profileState.filtro;   // si ya no queda ninguno con bandera, se quita el filtro
   const interesados = getEvents().filter(e => isUpcoming(e, todayStr) && e.interes && !hasMe(e.asistentes));
   const past = myPastEvents();
   const thisYear = String(new Date().getFullYear());
@@ -87,8 +88,8 @@ export function renderProfile(historyReady) {
       <div class="stat-card"><div class="stat-num">${byYear[thisYear] || 0}</div><div class="stat-label">Este año</div></div>
     </div>
 
-    <div class="section-title">🗓️ Mis próximos planes <span class="event-count">${next.length}</span>${interesados.length ? ` <span class="event-count" title="Planes con bandera: me interesan pero no sé si voy">🚩 ${interesados.length}</span>` : ''}</div>
-    ${next.length || interesados.length ? [...next.map(e => ({ e, i: false })), ...interesados.map(e => ({ e, i: true }))].sort((a, b) => a.e.fecha.localeCompare(b.e.fecha)).map(({ e, i }) => planRow(e, false, i)).join('') : vacioHTML('triste', 'No estás apuntado a nada todavía. Ve a Quedadas y pulsa "Apuntarme".', { pequeno: true, una: true })}
+    <div class="section-title">🗓️ Mis próximos planes <button class="event-count count-btn${filtro === 'voy' ? ' on' : ''}" data-action="perfil-filtro" data-f="voy" title="Ver solo a los que voy" aria-pressed="${filtro === 'voy'}">${next.length}</button>${interesados.length ? ` <button class="event-count count-btn${filtro === 'bandera' ? ' on' : ''}" data-action="perfil-filtro" data-f="bandera" title="Ver solo los que tienen bandera (me interesan, no sé si voy)" aria-pressed="${filtro === 'bandera'}">🚩 ${interesados.length}</button>` : ''}${filtro ? ' <button class="count-btn quitar-filtro" data-action="perfil-filtro" data-f="">Ver todos</button>' : ''}</div>
+    ${next.length || interesados.length ? [...(filtro === 'bandera' ? [] : next).map(e => ({ e, i: false })), ...(filtro === 'voy' ? [] : interesados).map(e => ({ e, i: true }))].sort((a, b) => a.e.fecha.localeCompare(b.e.fecha)).map(({ e, i }) => planRow(e, false, i)).join('') : vacioHTML('triste', 'No estás apuntado a nada todavía. Ve a Quedadas y pulsa "Apuntarme".', { pequeno: true, una: true })}
 
     <div class="section-title">📜 Mi historial <span class="event-count">${past.length}</span></div>
     ${years.length ? `<div class="year-chips">${years.map(y => `<span class="attendee-chip">${y}: <strong>${byYear[y]}</strong></span>`).join('')}</div>` : ''}
