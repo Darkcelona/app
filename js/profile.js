@@ -28,6 +28,10 @@ function planRow(ev, past) {
       ${!past && ev.previa ? `<div class="plan-sub plan-previa">🍺 Previa: ${escHtml(ev.previa)}</div>` : ''}
       ${asistentesFila(ev, past)}
     </div>
+    ${past || !ev.id ? '' : `<div class="plan-acciones">
+      <button class="btn-sm" data-action="calendar" data-id="${escHtml(ev.id)}" title="Añadir a mi calendario" aria-label="Añadir a mi calendario">📅</button>
+      <button class="btn-sm" data-action="leave" data-id="${escHtml(ev.id)}">Quitarme</button>
+    </div>`}
   </div>`;
 }
 
