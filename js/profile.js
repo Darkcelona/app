@@ -1,11 +1,20 @@
 import { MONTHS_ES, TYPE_ICONS } from './config.js';
-import { escHtml, parseDate, today } from './utils.js';
+import { escHtml, parseDate, today, getAttendees } from './utils.js';
 import { getEvents, getMyHistory, getUser, hasMe, isAdmin } from './store.js';
 import { isUpcoming } from './render.js';
+import { preferenciaCalendario } from './calendario.js';
 import { vacioHTML } from './mascota.js';
 
 const $ = id => document.getElementById(id);
 export const profileState = { pastLimit: 30 };
+
+/** Quién más va (en los pasados, solo los primeros: pueden ser muchos). */
+function asistentesFila(ev, past) {
+  const a = getAttendees(ev.asistentes);
+  if (a.length < 2) return '';
+  const lista = past && a.length > 8 ? a.slice(0, 8).map(escHtml).join(', ') + ` y ${a.length - 8} más` : a.map(escHtml).join(', ');
+  return `<div class="plan-sub plan-asistentes">👥 ${a.length}: ${lista}</div>`;
+}
 
 function planRow(ev, past) {
   const d = parseDate(ev.fecha);
@@ -17,6 +26,7 @@ function planRow(ev, past) {
       <div class="plan-title">${TYPE_ICONS[ev.tipo] || '🎸'} ${escHtml(ev.evento)}</div>
       <div class="plan-sub">${escHtml(ev.tipo || '')}${ev.sitio ? ' · 📍 ' + escHtml(ev.sitio) : ''}</div>
       ${!past && ev.previa ? `<div class="plan-sub plan-previa">🍺 Previa: ${escHtml(ev.previa)}</div>` : ''}
+      ${asistentesFila(ev, past)}
     </div>
   </div>`;
 }
@@ -67,6 +77,11 @@ export function renderProfile(historyReady) {
     ${past.slice(0, profileState.pastLimit).map(e => planRow(e, true)).join('') ||
       `<div class="empty-state small"><div class="empty-text">${historyReady ? 'Todavía no hay planes pasados con tu nombre.' : 'Cargando tu historial…'}</div></div>`}
     ${past.length > profileState.pastLimit ? `<button class="btn-secondary btn-more" data-action="profile-more">Mostrar más (${past.length - profileState.pastLimit} restantes)</button>` : ''}
+
+    <div class="section-title">📅 Calendario</div>
+    ${preferenciaCalendario()
+      ? `<p class="profile-hint cal-pref">Al pulsar el 📅 de un plan se añade directamente a <strong>${preferenciaCalendario() === 'google' ? 'Google Calendar' : 'tu calendario (archivo .ics)'}</strong>. <button class="btn-secondary" data-action="cal-reset">Restablecer elección</button></p>`
+      : '<p class="profile-hint cal-pref">Al pulsar el 📅 de un plan te pregunto cómo añadirlo. Si marcas "Hacerlo siempre así", aquí podrás deshacerlo.</p>'}
 
     <p class="profile-hint">¿Falta algún plan o aparece algún nombre tuyo mal escrito en el Excel? Díselo a un admin para que añada ese nombre a tu perfil.</p>
     <div class="settings-actions"><button class="btn-secondary btn-danger" data-action="logout">Cerrar sesión en este dispositivo</button></div>`;

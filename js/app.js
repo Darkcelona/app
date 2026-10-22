@@ -5,7 +5,7 @@ import {
 } from './store.js';
 import { filters, renderEvents, renderBares, renderHistorial, toggleAttendees, fillTypeSelect, renderNovedades, renderNovedadesAviso } from './render.js';
 import { asegurarVisto, entrarNovedades, salirNovedades } from './novedades.js';
-import { alApuntarse, abrirCalendario, elegirCalendario, cerrarCalendario } from './calendario.js';
+import { abrirCalendario, elegirCalendario, cerrarCalendario, resetearCalendario } from './calendario.js';
 import { renderProfile, profileState } from './profile.js';
 import { renderCumples, renderCumpleBanner, ocultarAvisoHoy } from './cumples.js';
 import { renderGrupos } from './grupos.js';
@@ -184,7 +184,7 @@ function toggleGoing(id, joining) {
   renderAll();
   showToast(joining ? '🤘 ¡Apuntado!' : 'Te has quitado del plan');
   scheduleFlush();
-  if (joining) { celebrar(); alApuntarse(ev); }
+  if (joining) celebrar();
 }
 
 // ── Modal de evento ─────────────────────────────────────
@@ -272,7 +272,7 @@ function saveEvent() {
   const idx = editingId ? events.findIndex(e => e.id === editingId) : -1;
   const previous = idx >= 0 ? events[idx] : undefined;
   if (previous && !Object.keys(diffEvent(previous, { ...previous, ...data })).length) { closeModal(); return; }   // sin cambios
-  const saved = previous ? { ...previous, ...data } : { id: uid(), ...data };
+  const saved = previous ? { ...previous, ...data } : { id: uid(), ...data, mio: true };   // lo que creo yo lo puedo borrar
   if (previous) events[idx] = saved; else events.push(saved);
   setEvents(events);
   queueUpsert(saved, previous);
@@ -283,9 +283,9 @@ function saveEvent() {
 }
 
 function deleteEvent(id) {
-  if (!isAdmin()) return;
   const ev = getEvents().find(e => e.id === id);
-  if (!ev || !confirm('¿Eliminar este evento? Se borrará del Excel (queda anotado en el registro y se puede deshacer).')) return;
+  if (!ev || !(isAdmin() || ev.mio)) return;
+  if (!confirm('¿Eliminar este evento? Desaparecerá para todo el grupo (queda anotado en el registro y un admin puede deshacerlo).')) return;
   queueDelete(ev);
   setEvents(getEvents().filter(e => e.id !== id));
   renderAll();
@@ -380,6 +380,7 @@ const actions = {
   'calendar': el => abrirCalendario(el.dataset.id),
   'cal-elegir': el => elegirCalendario(el.dataset.via),
   'cal-cerrar': cerrarCalendario,
+  'cal-reset': () => { resetearCalendario(); renderProfile(true); },
   'cumple-dismiss': () => ocultarAvisoHoy(),
   'history-more': async () => {
     const pintar = () => { if (currentTab === 'historial') renderHistorial(); };

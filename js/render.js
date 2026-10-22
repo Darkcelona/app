@@ -131,7 +131,7 @@ export function eventCard(ev, d, todayStr) {
           </div>
           <div class="event-actions">
             <button class="btn-sm" data-action="edit" data-id="${id}" aria-label="Editar evento">✏️</button>
-            ${isAdmin() ? `<button class="btn-sm del" data-action="delete" data-id="${id}" aria-label="Eliminar evento">🗑️</button>` : ''}
+            ${isAdmin() || ev.mio ? `<button class="btn-sm del" data-action="delete" data-id="${id}" aria-label="Eliminar evento">🗑️</button>` : ''}
           </div>
         </div>
         ${mediaBtns}

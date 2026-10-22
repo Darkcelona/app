@@ -2,7 +2,7 @@
 // No hace falta ningún permiso ni cuenta: la persona solo confirma en su calendario.
 import { KEYS } from './config.js';
 import { calendarioGoogleUrl, calendarioIcs, hashId, eventKey } from './utils.js';
-import { getEvents, lsGet, lsSet } from './store.js';
+import { getEvents, lsGet, lsSet, lsRemove } from './store.js';
 import { $, showToast } from './ui.js';
 
 const appUrl = () => location.origin + location.pathname;
@@ -41,24 +41,31 @@ export function cerrarCalendario() {
   pendiente = null;
 }
 
-/** Al apuntarse: hace lo que la persona eligió la otra vez; si nunca eligió, pregunta. */
-export function alApuntarse(ev) {
-  const pref = preferencia();
-  if (pref === 'google' || pref === 'ics') hacer(ev, pref);
-  else if (pref !== 'no') preguntar(ev);
-}
-
-/** El botón 📅 de una tarjeta: pregunta siempre (así se puede cambiar de opinión). */
+/** El botón 📅 de una tarjeta: si ya elegí "siempre así", lo hace directamente; si no, pregunta. */
 export function abrirCalendario(id) {
   const ev = getEvents().find(e => e.id === id);
-  if (ev) preguntar(ev);
+  if (!ev) return;
+  const pref = preferencia();
+  if (pref === 'google' || pref === 'ics') { hacer(ev, pref); if (pref === 'ics') showToast('📅 Abre el archivo para añadirlo'); }
+  else preguntar(ev);
 }
 
 export function elegirCalendario(via) {
   const ev = pendiente;
   if (!ev) return;
-  if ($('cal-recordar').checked) lsSet(KEYS.calendario, via);
+  if (via !== 'no' && $('cal-recordar').checked) lsSet(KEYS.calendario, via);
   cerrarCalendario();
+  if (via === 'no') return;
   hacer(ev, via);
   if (via === 'ics') showToast('📅 Abre el archivo para añadirlo');
+}
+
+/** Para el Perfil: qué está elegido ('google' | 'ics' | '') y cómo olvidarlo. */
+export function preferenciaCalendario() {
+  const p = preferencia();
+  return p === 'google' || p === 'ics' ? p : '';
+}
+export function resetearCalendario() {
+  lsRemove(KEYS.calendario);
+  showToast('📅 Listo: la próxima vez te preguntaré');
 }
