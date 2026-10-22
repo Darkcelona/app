@@ -690,6 +690,13 @@
   }
   .event-card.is-new { border-color: var(--red); box-shadow: 0 0 0 1px var(--red), 0 0 18px rgba(204,26,26,.45); }
 
+  /* ── @ DE ASISTENTES ── */
+  .personas-caja { max-height: 190px; overflow-y: auto; margin-top: 4px; border: 1px solid var(--red); border-radius: 8px; background: var(--bg3); }
+  .personas-caja[hidden] { display: none; }
+  .persona-op { display: block; width: 100%; text-align: left; padding: 9px 12px; border: none; border-bottom: 1px solid var(--border); background: none; color: var(--text); font-family: 'Rajdhani', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .persona-op:last-child { border-bottom: none; }
+  .persona-op.sel, .persona-op:hover { background: rgba(204,26,26,.22); }
+
   /* ── CALENDARIO ── */
   .btn-cal { border-right: none; padding: 8px 12px; font-size: 15px; }
   .cal-evento { font-weight: 700; margin: 0 0 14px; }

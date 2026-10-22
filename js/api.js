@@ -180,6 +180,12 @@ export async function itemOp(kind, op, { id = '', data = null } = {}) {
   await syncNow();
 }
 
+/** Nombres de la gente del grupo (para el @ al escribir asistentes). */
+export async function loadPersonas() {
+  const json = await post({ action: 'personas' });
+  return Array.isArray(json.personas) ? json.personas : [];
+}
+
 // ── Administración (solo rol admin) ─────────────────────
 export async function admin(cmd, extra = {}) {
   return post({ action: 'admin', cmd, ...extra });

@@ -5,6 +5,7 @@ import {
 } from './store.js';
 import { filters, renderEvents, renderBares, renderHistorial, toggleAttendees, fillTypeSelect, renderNovedades, renderNovedadesAviso } from './render.js';
 import { asegurarVisto, entrarNovedades, salirNovedades } from './novedades.js';
+import { initPersonas, refrescarPersonas } from './personas.js';
 import { abrirCalendario, elegirCalendario, cerrarCalendario, resetearCalendario } from './calendario.js';
 import { renderProfile, profileState } from './profile.js';
 import { renderCumples, renderCumpleBanner, ocultarAvisoHoy } from './cumples.js';
@@ -219,6 +220,7 @@ function openModal(id) {
   $('f-propone').value = ev ? ev.propone || '' : user?.nombre || '';
   $('f-previa').value = ev?.previa || '';
   $('f-asistentes').value = ev ? ev.asistentes || '' : user?.nombre || '';
+  refrescarPersonas();
   $('f-imagen').value = ev?.imagen || '';
   $('f-youtube').value = ev?.youtube || '';
   $('f-tickets').value = ev?.tickets || '';
@@ -427,6 +429,7 @@ $('access-form').addEventListener('submit', e => {
   input.value = '';
   enterWithCode(code);
 });
+initPersonas($('f-asistentes'), $('personas-caja'));
 $('f-imagen').addEventListener('input', e => previewImg(e.target.value.trim()));
 $('search-input').addEventListener('input', e => { filters.search = e.target.value; renderEvents(); });
 // La búsqueda del historial la hace el servidor; se espera a que la persona deje de escribir para no preguntar en cada tecla.

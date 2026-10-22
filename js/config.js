@@ -14,6 +14,7 @@ export const KEYS = {
   grupos: 'darkcelona-grupos',
   novedadesVisto: 'darkcelona-novedades-visto',   // fecha de alta (del servidor) del último plan que ya vi
   calendario: 'darkcelona-calendario',            // 'google' | 'ics' | 'no': qué hacer al apuntarme
+  personas: 'darkcelona-personas',                // nombres del grupo para el @ de asistentes
   cumpleOculto: 'darkcelona-cumple-oculto',   // día (AAAA-MM-DD) en que se cerró el aviso de cumpleaños
   code: 'darkcelona-code',
   user: 'darkcelona-user',
