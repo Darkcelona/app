@@ -43,10 +43,10 @@ export function allTypes() {
 export function renderFilterChips() {
   const present = new Set(getEvents().map(e => e.tipo));
   const types = allTypes().filter(t => present.has(t));
-  if (filters.type !== 'all' && !types.includes(filters.type)) filters.type = 'all';
+  if (filters.type !== 'all' && filters.type !== 'mine' && filters.type !== 'flag' && !types.includes(filters.type)) filters.type = 'all';
   const chip = (value, label) =>
     `<button class="filter-chip${filters.type === value ? ' active' : ''}" data-filter="${escHtml(value)}">${label}</button>`;
-  $('filters').innerHTML = chip('all', 'Todos') + types.map(t => chip(t, escHtml(t))).join('');
+  $('filters').innerHTML = chip('all', 'Todos') + types.map(t => chip(t, escHtml(t))).join('') + chip('mine', '⚡ Mis planes') + (getEvents().some(e => e.interes && !hasMe(e.asistentes) && isUpcoming(e)) ? chip('flag', '🚩 Me interesan') : '');
 }
 
 export function fillTypeSelect(current) {
@@ -181,7 +181,13 @@ export function renderEvents() {
   renderFilterChips();
 
   const filtered = events.filter(e => {
-    if (filters.type !== 'all' && e.tipo !== filters.type) return false;
+    if (filters.type === 'flag') {
+      if (!e.interes || hasMe(e.asistentes)) return false;
+    } else if (filters.type === 'mine') {
+      if (!hasMe(e.asistentes)) return false;
+    } else if (filters.type !== 'all' && e.tipo !== filters.type) {
+      return false;
+    }
     if (search) return [e.evento, e.sitio, e.propone, e.asistentes, e.tipo].join(' ').toLowerCase().includes(search);
     return true;
   }).sort((a, b) => a.fecha.localeCompare(b.fecha));
