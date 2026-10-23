@@ -429,6 +429,7 @@ const actions = {
   'sync': () => runSync(true),
   'goto-profile': () => selectTab('perfil'),
   'goto-novedades': () => selectTab('novedades'),
+  'goto-quedadas': () => { selectTab('quedadas'); window.scrollTo({ top: 0, behavior: 'smooth' }); },
   'calendar': el => abrirCalendario(el.dataset.id),
   'cal-elegir': el => elegirCalendario(el.dataset.via),
   'cal-cerrar': cerrarCalendario,

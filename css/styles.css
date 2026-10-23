@@ -43,6 +43,7 @@
     display: flex; align-items: center; gap: 10px;
   }
   .logo-h1 { display: flex; align-items: center; gap: 10px; margin: 0; font-weight: 400; }
+  .logo-btn { display: flex; align-items: center; gap: 10px; background: none; border: none; padding: 0; color: inherit; font: inherit; cursor: pointer; }
   .logo-img { height: 30px; width: auto; display: block; }
   .logo-agenda {
     font-family: 'Rajdhani', sans-serif; font-weight: 700; color: var(--gold);
@@ -822,3 +823,13 @@
   .venta-agotado { color: #ff6b6b; border-color: #ff6b6b; background: rgba(255,107,107,.12); }
   .venta-cancelado { color: #aaa; border-color: #777; background: rgba(120,120,120,.18); text-decoration: line-through; }
   .venta-aplazado { color: var(--gold); border-color: var(--gold); background: rgba(200,168,75,.12); }
+
+  /* ── ESTADÍSTICAS DE QUEDADAS: números sobre el fondo, sin cajas (no parecen botones) ── */
+  .stats-row.plano { grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 6px 0 22px; }
+  .stats-row.plano .stat-card { background: none; border: none; border-radius: 0; padding: 4px 0; }
+  .stats-row.plano .stat-num { font-size: 56px; }
+  .stats-row.plano .stat-label { font-size: 13px; letter-spacing: .5px; margin-top: 8px; }
+  @media (max-width: 480px) {
+    .stats-row.plano { grid-template-columns: repeat(2, 1fr); }
+    .stats-row.plano .stat-num { font-size: 46px; }
+  }

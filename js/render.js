@@ -43,10 +43,10 @@ export function allTypes() {
 export function renderFilterChips() {
   const present = new Set(getEvents().map(e => e.tipo));
   const types = allTypes().filter(t => present.has(t));
-  if (filters.type !== 'all' && filters.type !== 'mine' && filters.type !== 'flag' && !types.includes(filters.type)) filters.type = 'all';
+  if (filters.type !== 'all' && !types.includes(filters.type)) filters.type = 'all';
   const chip = (value, label) =>
     `<button class="filter-chip${filters.type === value ? ' active' : ''}" data-filter="${escHtml(value)}">${label}</button>`;
-  $('filters').innerHTML = chip('all', 'Todos') + types.map(t => chip(t, escHtml(t))).join('') + chip('mine', '⚡ Mis planes') + (getEvents().some(e => e.interes && !hasMe(e.asistentes) && isUpcoming(e)) ? chip('flag', '🚩 Me interesan') : '');
+  $('filters').innerHTML = chip('all', 'Todos') + types.map(t => chip(t, escHtml(t))).join('');
 }
 
 export function fillTypeSelect(current) {
@@ -181,13 +181,7 @@ export function renderEvents() {
   renderFilterChips();
 
   const filtered = events.filter(e => {
-    if (filters.type === 'flag') {
-      if (!e.interes || hasMe(e.asistentes)) return false;
-    } else if (filters.type === 'mine') {
-      if (!hasMe(e.asistentes)) return false;
-    } else if (filters.type !== 'all' && e.tipo !== filters.type) {
-      return false;
-    }
+    if (filters.type !== 'all' && e.tipo !== filters.type) return false;
     if (search) return [e.evento, e.sitio, e.propone, e.asistentes, e.tipo].join(' ').toLowerCase().includes(search);
     return true;
   }).sort((a, b) => a.fecha.localeCompare(b.fecha));
@@ -195,7 +189,6 @@ export function renderEvents() {
   const r = resumenPlanes(events, todayStr);
   $('stats-row').innerHTML = `
     <div class="stat-card"><div class="stat-num">${r.proximos}</div><div class="stat-label">Próximos planes</div></div>
-    <div class="stat-card" title="Conciertos, conciertos tributo y festivales"><div class="stat-num">${r.conciertos}</div><div class="stat-label">De los cuales, conciertos</div></div>
     <div class="stat-card"><div class="stat-num gold">${r.voy}</div><div class="stat-label">Voy a 🤘</div></div>`;
 
   const list = $('events-list');
