@@ -32,7 +32,7 @@ export const MONTHS_FULL = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio
 export const DAYS_ES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
 // Tipos del desplegable del Excel (validación de datos de la columna Tipo). Los que aparezcan en los datos se añaden solos.
-export const DEFAULT_TYPES = ['Concierto', 'Tributo', 'Festival', 'Cerveceo', 'Barbacoa', 'Otros'];
+export const DEFAULT_TYPES = ['Concierto', 'Tributo', 'Festival', 'Cerveceo', 'Eventos Darkcelona', 'Otros'];
 // Lo que cuenta como "conciertos" en el resumen de la página principal (música en directo).
 export const TIPOS_CONCIERTO = ['Concierto', 'Tributo', 'Festival'];
-export const TYPE_ICONS = { 'Concierto': '🎸', 'Tributo': '🎭', 'Festival': '🎪', 'Cerveceo': '🍺', 'Barbacoa': '🍖', 'Otros': '⚡' };
+export const TYPE_ICONS = { 'Concierto': '🎸', 'Tributo': '🎭', 'Festival': '🎪', 'Cerveceo': '🍺', 'Eventos Darkcelona': '🤘', 'Otros': '⚡' };

@@ -203,7 +203,7 @@ export const eventKey = ev => `${ev.fecha}|${String(ev.evento || '').trim().toLo
 
 /** Asigna ids estables (hash de fecha+evento) para que no cambien entre sincronizaciones. */
 // Nombres de tipo antiguos que se muestran con el nombre actual (el Excel real, al importarlo, aún trae el viejo).
-const TIPOS_ANTIGUOS = { 'Concierto Tributo': 'Tributo' };
+const TIPOS_ANTIGUOS = { 'Concierto Tributo': 'Tributo', 'Barbacoa': 'Eventos Darkcelona' };
 
 export function assignIds(list) {
   const seen = new Set();

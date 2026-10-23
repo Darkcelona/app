@@ -15,7 +15,7 @@ function typeClass(tipo) {
   if (tipo === 'Concierto') return 'type-Concierto';
   if (tipo === 'Cerveceo') return 'type-Cerveceo';
   if (tipo === 'Festival') return 'type-Festival';
-  if (tipo === 'Barbacoa') return 'type-Barbacoa';
+  if (tipo === 'Eventos Darkcelona') return 'type-Barbacoa';   // misma clase (verde) que tenía Barbacoa
   return 'type-Otros';
 }
 
