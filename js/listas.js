@@ -64,7 +64,9 @@ export async function guardarLista() {
 
 export async function borrarLista(kind, id) {
   const item = (kind === 'bar' ? getBares() : getCumples()).find(x => x.id === id);
-  if (!item || !confirm(`¿Borrar «${kind === 'bar' ? item.nombre : item.n}»?`)) return;
+  if (!item) return;
+  const nombre = kind === 'bar' ? item.nombre : item.n;
+  if (!confirm(`¿Seguro que quieres borrar ${kind === 'bar' ? 'el bar' : 'el cumpleaños de'} «${nombre}»? Desaparecerá para todo el grupo.`)) return;
   try { await itemOp(kind, 'delete', { id }); alCambiar(); showToast('Borrado'); }
   catch (err) { showToast(mensajeError(err), 'error'); }
 }
