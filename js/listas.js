@@ -10,8 +10,8 @@ let ctx = null;                       // { kind, id }
 let alCambiar = () => {};
 export const initListas = fn => { alCambiar = fn; };
 
-/** ¿Puede esta persona tocar este elemento? Lo suyo, o todo si es admin. */
-export const puedeTocar = item => isAdmin() || !!item?.mio;
+/** ¿Puede esta persona tocar este elemento? Los bares son colaborativos: cualquiera. Los cumpleaños: lo suyo, o todo si es admin. */
+export const puedeTocar = (kind, item) => kind === 'bar' ? !!item : isAdmin() || !!item?.mio;
 
 const campo = (id, etiqueta, valor = '', extra = '') =>
   `<div class="form-group full"><label class="form-label" for="${id}">${etiqueta}</label><input class="form-input" id="${id}" value="${escHtml(valor)}" ${extra}></div>`;
@@ -77,7 +77,7 @@ export function mensajeError(err) {
   return m || 'No se ha podido guardar';
 }
 
-export const botonesLista = (kind, item) => puedeTocar(item)
+export const botonesLista = (kind, item) => puedeTocar(kind, item)
   ? `<span class="lista-acciones"><button class="btn-sm" data-action="lista-edit" data-kind="${kind}" data-id="${escHtml(item.id)}" aria-label="Editar">✏️</button><button class="btn-sm del" data-action="lista-del" data-kind="${kind}" data-id="${escHtml(item.id)}" aria-label="Borrar">🗑️</button></span>`
   : '';
 export const botonAnadir = (kind, texto) => `<button class="btn-add-lista" data-action="lista-add" data-kind="${kind}">＋ ${texto}</button>`;
