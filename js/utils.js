@@ -202,6 +202,9 @@ export function removeAttendee(text, user) {
 export const eventKey = ev => `${ev.fecha}|${String(ev.evento || '').trim().toLowerCase()}`;
 
 /** Asigna ids estables (hash de fecha+evento) para que no cambien entre sincronizaciones. */
+// Nombres de tipo antiguos que se muestran con el nombre actual (el Excel real, al importarlo, aún trae el viejo).
+const TIPOS_ANTIGUOS = { 'Concierto Tributo': 'Tributo' };
+
 export function assignIds(list) {
   const seen = new Set();
   return list.map(ev => {
@@ -209,7 +212,7 @@ export function assignIds(list) {
     let id = base, n = 2;
     while (seen.has(id)) id = `${base}-${n++}`;
     seen.add(id);
-    return { ...ev, id };
+    return { ...ev, id, tipo: TIPOS_ANTIGUOS[ev.tipo] || ev.tipo };
   });
 }
 
