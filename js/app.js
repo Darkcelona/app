@@ -37,13 +37,18 @@ function hideAccess() {
   document.body.classList.remove('locked');
 }
 
+/** El botón ＋ de crear plan solo se ve en Quedadas (y con sesión iniciada). */
+function actualizarFab() {
+  document.querySelector('.fab').hidden = !(getUser() && currentTab === 'quedadas');
+}
+
 /** Pinta lo que depende de quién soy: nombre en la cabecera, pestaña Admin y botón de añadir. */
 function applyUserUI() {
   const user = getUser();
   $('user-chip').hidden = !user;
   if (user) $('user-chip').textContent = '👤 ' + user.nombre;
   $('admin-chip').hidden = !isAdmin();
-  document.querySelector('.fab').hidden = !user;
+  actualizarFab();
 }
 
 function logout(msg) {
@@ -69,6 +74,7 @@ function selectTab(name) {
     t.setAttribute('aria-selected', String(active));
   });
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+  actualizarFab();
   $('user-chip').classList.toggle('active', name === 'perfil');   // Perfil y Admin ya no están en la barra: se marcan arriba a la derecha
   $('admin-chip').classList.toggle('active', name === 'admin');
   if (name === 'quedadas') { filters.type = 'all'; renderEvents(); }   // volver a Quedadas (pestaña o logo) siempre con el filtro en Todos
