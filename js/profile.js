@@ -82,7 +82,7 @@ export function renderProfile(historyReady) {
       </div>
     </div>
 
-    <div class="stats-row">
+    <div class="stats-row plano">
       <div class="stat-card"><div class="stat-num gold">${next.length}</div><div class="stat-label">Próximos planes</div></div>
       <div class="stat-card"><div class="stat-num">${past.length}</div><div class="stat-label">Planes pasados</div></div>
       <div class="stat-card"><div class="stat-num">${byYear[thisYear] || 0}</div><div class="stat-label">Este año</div></div>

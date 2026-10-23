@@ -833,3 +833,12 @@
     .stats-row.plano { grid-template-columns: repeat(2, 1fr); }
     .stats-row.plano .stat-num { font-size: 46px; }
   }
+
+  /* El Perfil lleva tres números: mismo estilo plano, algo más pequeños */
+  #profile-view .stats-row.plano { grid-template-columns: repeat(3, 1fr); }
+  #profile-view .stats-row.plano .stat-num { font-size: 46px; }
+  @media (max-width: 480px) {
+    #profile-view .stats-row.plano { grid-template-columns: repeat(3, 1fr); }
+    #profile-view .stats-row.plano .stat-num { font-size: 34px; }
+    #profile-view .stats-row.plano .stat-label { font-size: 11px; }
+  }
