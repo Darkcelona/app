@@ -28,7 +28,7 @@ function showAccess(msg) {
   $('access-screen').hidden = false;
   document.body.classList.add('locked');
   $('user-chip').hidden = true;
-  $('tab-admin').hidden = true;
+  $('admin-chip').hidden = true;
   document.querySelector('.fab').hidden = true;
 }
 
@@ -42,7 +42,7 @@ function applyUserUI() {
   const user = getUser();
   $('user-chip').hidden = !user;
   if (user) $('user-chip').textContent = '👤 ' + user.nombre;
-  $('tab-admin').hidden = !isAdmin();
+  $('admin-chip').hidden = !isAdmin();
   document.querySelector('.fab').hidden = !user;
 }
 
@@ -69,6 +69,8 @@ function selectTab(name) {
     t.setAttribute('aria-selected', String(active));
   });
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+  $('user-chip').classList.toggle('active', name === 'perfil');   // Perfil y Admin ya no están en la barra: se marcan arriba a la derecha
+  $('admin-chip').classList.toggle('active', name === 'admin');
   if (name === 'novedades') { renderNovedades(); renderNovedadesAviso(); }
   if (name === 'bares') renderBares();
   if (name === 'cumples') renderCumples();
@@ -428,6 +430,7 @@ const actions = {
   'plus-menos': el => cambiarAcompanantes(el.dataset.id, -1),
   'sync': () => runSync(true),
   'goto-profile': () => selectTab('perfil'),
+  'goto-admin': () => selectTab('admin'),
   'goto-novedades': () => selectTab('novedades'),
   'goto-quedadas': () => { selectTab('quedadas'); window.scrollTo({ top: 0, behavior: 'smooth' }); },
   'calendar': el => abrirCalendario(el.dataset.id),

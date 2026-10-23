@@ -61,6 +61,9 @@
     font-weight: 600; display: flex; align-items: center; gap: 6px;
   }
   .btn-icon:hover { border-color: var(--red); color: var(--red); }
+  .btn-icon[hidden] { display: none; }
+  .btn-icon.active { border-color: var(--red); color: var(--red); background: rgba(204,26,26,.15); }
+  @media (max-width: 480px) { #admin-chip .chip-txt { display: none; } }
 
   /* ── NAV TABS ── */
   .nav-tabs {
