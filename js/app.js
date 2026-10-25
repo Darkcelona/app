@@ -437,6 +437,7 @@ const actions = {
   'plus-mas': el => cambiarAcompanantes(el.dataset.id, 1),
   'plus-menos': el => cambiarAcompanantes(el.dataset.id, -1),
   'sync': () => runSync(true),
+  'search-clear': el => { const inp = el.parentNode.querySelector('input'); inp.value = ''; inp.dispatchEvent(new Event('input', { bubbles: true })); inp.focus(); },   // la crucecita propia: iOS no enseña la suya con el campo personalizado
   'goto-profile': () => selectTab('perfil'),
   'goto-admin': () => selectTab('admin'),
   'goto-novedades': () => selectTab('novedades'),

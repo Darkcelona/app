@@ -88,7 +88,7 @@
     <div class="stats-row plano" id="stats-row"></div>
 
     <div class="filters" id="filters"></div>
-    <input class="filter-search" type="search" id="search-input" placeholder="🔍 Buscar eventos, sitios, asistentes..." aria-label="Buscar eventos">
+    <div class="search-wrap"><input class="filter-search" type="search" id="search-input" placeholder="🔍 Buscar eventos, sitios, asistentes..." aria-label="Buscar eventos"><button type="button" class="search-clear" data-action="search-clear" aria-label="Borrar búsqueda">✕</button></div>
 
     <div id="events-list"></div>
   </section>
@@ -116,7 +116,7 @@
   <!-- HISTORIAL -->
   <section id="panel-historial" class="panel" role="tabpanel">
     <div class="filters">
-      <input class="filter-search" type="search" id="hist-search" placeholder="🔍 Buscar historial..." aria-label="Buscar en el historial">
+      <div class="search-wrap"><input class="filter-search" type="search" id="hist-search" placeholder="🔍 Buscar historial..." aria-label="Buscar en el historial"><button type="button" class="search-clear" data-action="search-clear" aria-label="Borrar búsqueda">✕</button></div>
     </div>
     <div id="historial-list"></div>
   </section>

@@ -27,6 +27,7 @@ export const CA = {
   "Borrado": "Esborrat",
   "Borrar": "Esborra",
   "Buscar en el historial": "Cerca a l'historial",
+  "Borrar búsqueda": "Esborra la cerca",
   "Buscar eventos": "Cerca plans",
   "COMPLETO": "COMPLET",
   "Calendario": "Calendari",

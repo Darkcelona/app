@@ -27,6 +27,7 @@ export const EN = {
   "Borrado": "Deleted",
   "Borrar": "Delete",
   "Buscar en el historial": "Search the history",
+  "Borrar búsqueda": "Clear search",
   "Buscar eventos": "Search plans",
   "COMPLETO": "FULL",
   "Calendario": "Calendar",
