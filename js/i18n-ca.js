@@ -179,7 +179,7 @@ export const CA = {
   "Verlos →": "Veure'ls →",
   "Vista previa": "Vista prèvia",
   "Voy a": "Hi vaig",
-  "Voy · Quitarme": "Hi vaig · Treure'm",
+  "Voy": "Hi vaig",
   "Ya estaba apuntado": "Ja hi estava apuntat",
   "Ya no caben más": "Ja no hi caben més",
   "YouTube": "YouTube",

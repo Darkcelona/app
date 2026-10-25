@@ -179,7 +179,7 @@ export const EN = {
   "Verlos →": "See them →",
   "Vista previa": "Preview",
   "Voy a": "Going to",
-  "Voy · Quitarme": "Going · Leave",
+  "Voy": "Going",
   "Ya estaba apuntado": "Already signed up",
   "Ya no caben más": "No more room",
   "YouTube": "YouTube",

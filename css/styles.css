@@ -865,3 +865,10 @@
   }
   .search-clear:hover { background: var(--red); }
   .search-wrap:has(input:placeholder-shown) .search-clear { display: none; }   /* sin texto, sin cruz */
+
+  /* ── "VOY" JUNTO AL BOTÓN QUITARME ── */
+  .voy-tag {
+    display: flex; align-items: center; padding: 0 12px; white-space: nowrap;
+    color: var(--gold); font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: .3px;
+    border-right: 1px solid var(--border); background: rgba(200,168,75,.08);
+  }
