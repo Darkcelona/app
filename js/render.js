@@ -134,12 +134,15 @@ export function eventCard(ev, d, todayStr) {
     : '');
 
   const joinBtn = !upcoming ? '' : mine
-    ? `<button class="btn-join" data-action="leave" data-id="${id}">－ ${t('Quitarme')}</button><span class="voy-tag">✓ ${t('Voy')}</span>${pasos(ev, id)}<button class="btn-join btn-cal" data-action="calendar" data-id="${id}" title="${t('Añadir a mi calendario')}" aria-label="${t('Añadir a mi calendario')}">📅</button>`
+    ? `<button class="btn-join" data-action="leave" data-id="${id}">－ ${t('Quitarme')}</button><button class="btn-join btn-cal" data-action="calendar" data-id="${id}" title="${t('Añadir a mi calendario')}" aria-label="${t('Añadir a mi calendario')}">📅</button>`
     : sinPlazo
       ? `<button class="btn-join" disabled title="${t('Se acabó el plazo para apuntarse')}">🔒 ${t('Plazo cerrado')}</button>`
     : completo
       ? `<button class="btn-join" disabled title="${t('Ya no caben más')}">🔒 ${t('Completo')}</button>`
       : `<button class="btn-join" data-action="join" data-id="${id}">＋ ${t('Apuntarme')}</button>`;
+
+  // "Voy" y los acompañantes (+N) van pegados a la derecha, después de "Ver asistentes"
+  const derecha = upcoming && mine ? `<div class="foot-der"><span class="voy-tag">✓ ${t('Voy')}</span>${pasos(ev, id)}</div>` : '';
 
   return `
   <article class="event-card${mine ? ' omar-event' : ''}${nuevo ? ' is-new' : ''}" data-id="${id}">
@@ -167,6 +170,7 @@ export function eventCard(ev, d, todayStr) {
         <div class="event-foot">
           ${joinBtn}
           <button class="event-card-toggle" data-action="toggle" data-count="${personas}" aria-expanded="false">${t('Ver asistentes ({n}) ▾', { n: personas })}</button>
+          ${derecha}
         </div>
       </div>
     </div>

@@ -872,3 +872,8 @@
     color: var(--gold); font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 14px; letter-spacing: .3px;
     border-right: 1px solid var(--border); background: rgba(200,168,75,.08);
   }
+
+  /* ── "VOY" Y ACOMPAÑANTES, A LA DERECHA DEL TODO ── */
+  .event-foot .foot-der { display: flex; align-items: stretch; margin-left: auto; border-left: 1px solid var(--border); }
+  .foot-der .voy-tag { border-right: none; }
+  .foot-der .plus-step { border-right: none; border-left: 1px solid var(--border); }
