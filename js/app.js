@@ -77,7 +77,7 @@ function selectTab(name) {
   actualizarFab();
   $('user-chip').classList.toggle('active', name === 'perfil');   // Perfil y Admin ya no están en la barra: se marcan arriba a la derecha
   $('admin-chip').classList.toggle('active', name === 'admin');
-  if (name === 'quedadas') { filters.type = 'all'; renderEvents(); }   // volver a Quedadas (pestaña o logo) siempre con el filtro en Todos
+  if (name === 'quedadas') { filters.type = 'all'; filters.search = ''; $('search-input').value = ''; renderEvents(); }   // volver a Quedadas (pestaña o logo) siempre con el filtro en Todos
   if (name === 'novedades') { renderNovedades(); renderNovedadesAviso(); }
   if (name === 'bares') renderBares();
   if (name === 'cumples') renderCumples();
