@@ -134,7 +134,7 @@ export function eventCard(ev, d, todayStr) {
     : '');
 
   const joinBtn = !upcoming ? '' : mine
-    ? `<span class="voy-tag">✓ ${t('Voy')}</span><button class="btn-join" data-action="leave" data-id="${id}">${t('Quitarme')}</button>${pasos(ev, id)}<button class="btn-join btn-cal" data-action="calendar" data-id="${id}" title="${t('Añadir a mi calendario')}" aria-label="${t('Añadir a mi calendario')}">📅</button>`
+    ? `<button class="btn-join" data-action="leave" data-id="${id}">－ ${t('Quitarme')}</button><span class="voy-tag">✓ ${t('Voy')}</span>${pasos(ev, id)}<button class="btn-join btn-cal" data-action="calendar" data-id="${id}" title="${t('Añadir a mi calendario')}" aria-label="${t('Añadir a mi calendario')}">📅</button>`
     : sinPlazo
       ? `<button class="btn-join" disabled title="${t('Se acabó el plazo para apuntarse')}">🔒 ${t('Plazo cerrado')}</button>`
     : completo
