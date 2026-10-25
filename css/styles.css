@@ -845,3 +845,11 @@
     #profile-view .stats-row.plano .stat-num { font-size: 34px; }
     #profile-view .stats-row.plano .stat-label { font-size: 11px; }
   }
+
+  /* ── SELECTOR DE IDIOMA ── */
+  .lang-select {
+    background: var(--bg3); border: 1px solid var(--border); color: var(--text); border-radius: 8px;
+    padding: 8px 6px; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer;
+  }
+  .lang-select:hover { border-color: var(--red); }
+  .access-idioma { display: flex; justify-content: center; margin: -8px 0 14px; }

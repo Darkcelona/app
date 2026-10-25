@@ -4,6 +4,7 @@ import { MONTHS_FULL, KEYS } from './config.js';
 import { escHtml, normalizeName, namesOf, toISODate } from './utils.js';
 import { getCumples, getUser, lsGet, lsSet } from './store.js';
 import { botonesLista, botonAnadir } from './listas.js';
+import { t } from './i18n.js';
 
 const $ = id => document.getElementById(id);
 const DIA_MS = 86400000;
@@ -67,7 +68,7 @@ export function porMes(lista) {
   return meses;
 }
 
-const unir = nombres => (nombres.length <= 1 ? nombres.join('') : nombres.slice(0, -1).join(', ') + ' y ' + nombres[nombres.length - 1]);
+const unir = nombres => (nombres.length <= 1 ? nombres.join('') : nombres.slice(0, -1).join(', ') + ' ' + t('y') + ' ' + nombres[nombres.length - 1]);
 
 // ── Aviso en la página principal ────────────────────────
 
@@ -78,11 +79,11 @@ export function textoAviso(nombresHoy, nombreUsuario = '', esMioFn = esMio) {
   const personas = nombresHoy.filter(n => !esAniversario(n));
   const lineas = [];
   const propio = personas.find(esMioFn);
-  if (propio) lineas.push({ icono: '🎉', texto: `¡Feliz cumpleaños${nombreUsuario ? ', ' + nombreUsuario : ''}!`, grande: true });
-  if (aniv.length) lineas.push({ icono: '🎉', texto: '¡Hoy es el aniversario de Darkcelona!', grande: !propio });
+  if (propio) lineas.push({ icono: '🎉', texto: nombreUsuario ? t('¡Feliz cumpleaños, {nombre}!', { nombre: nombreUsuario }) : t('¡Feliz cumpleaños!'), grande: true });
+  if (aniv.length) lineas.push({ icono: '🎉', texto: t('¡Hoy es el aniversario de Darkcelona!'), grande: !propio });
   const otros = personas.filter(n => n !== propio);
   if (otros.length) {
-    lineas.push({ icono: '🎂', texto: `Hoy ${otros.length === 1 ? 'cumple años' : 'cumplen años'} ${unir(otros)}`, grande: !propio && !aniv.length });
+    lineas.push({ icono: '🎂', texto: otros.length === 1 ? t('Hoy cumple años {nombres}', { nombres: unir(otros) }) : t('Hoy cumplen años {nombres}', { nombres: unir(otros) }), grande: !propio && !aniv.length });
   }
   return lineas;
 }
@@ -95,7 +96,7 @@ export function renderCumpleBanner(ahora = new Date()) {
   if (!lineas || !lineas.length || lsGet(KEYS.cumpleOculto) === hoyISO) { el.hidden = true; return; }
   el.hidden = false;
   el.innerHTML = lineas.map(l => `<div class="cumple-linea${l.grande ? ' grande' : ''}"><span aria-hidden="true">${l.icono}</span> ${escHtml(l.texto)}</div>`).join('') +
-    '<button class="btn-dismiss" data-action="cumple-dismiss" aria-label="Cerrar el aviso de hoy">✕</button>';
+    `<button class="btn-dismiss" data-action="cumple-dismiss" aria-label="${t('Cerrar el aviso de hoy')}">✕</button>`;
 }
 
 /** Oculta el aviso hasta mañana. */
@@ -107,19 +108,19 @@ export function ocultarAvisoHoy(ahora = new Date()) {
 // ── Pestaña Cumpleaños ──────────────────────────────────
 
 function cuando(enDias, f) {
-  if (enDias === 0) return 'Hoy';
-  if (enDias === 1) return 'Mañana';
-  return `En ${enDias} días · ${f.getDate()}/${f.getMonth() + 1}`;
+  if (enDias === 0) return t('Hoy');
+  if (enDias === 1) return t('Mañana');
+  return t('En {n} días', { n: enDias }) + ` · ${f.getDate()}/${f.getMonth() + 1}`;
 }
 
-const etiquetaNombre = n => (esAniversario(n) ? '🎉 Aniversario de Darkcelona' : escHtml(n));
+const etiquetaNombre = n => (esAniversario(n) ? '🎉 ' + t('Aniversario de Darkcelona') : escHtml(n));
 
 export function renderCumples(ahora = new Date()) {
   const vista = $('cumples-view');
   if (!vista) return;
   const lista = getCumples();
   if (!lista.length) {
-    vista.innerHTML = `<div class="lista-cabecera">${botonAnadir('cumple', 'Añadir cumpleaños')}</div><div class="empty-state"><div class="empty-icon">🎂</div><div class="empty-text">Todavía no hay cumpleaños cargados.</div></div>`;
+    vista.innerHTML = `<div class="lista-cabecera">${botonAnadir('cumple', 'Añadir cumpleaños')}</div><div class="empty-state"><div class="empty-icon">🎂</div><div class="empty-text">${t('Todavía no hay cumpleaños cargados.')}</div></div>`;
     return;
   }
   const hoy = hoySinHora(ahora);
@@ -141,14 +142,14 @@ export function renderCumples(ahora = new Date()) {
       ${items.length ? items.map(x => `
         <div class="cumple-dia${m === mesActual && x.d === hoy.getDate() ? ' hoy' : ''}">
           <span class="cumple-num">${x.d}</span><span class="cumple-nom${esMio(x.n) ? ' mio' : ''}">${etiquetaNombre(x.n)}</span>${x.id ? botonesLista('cumple', x) : ''}
-        </div>`).join('') : '<div class="cumple-dia vacio">Nadie este mes</div>'}
+        </div>`).join('') : `<div class="cumple-dia vacio">${t('Nadie este mes')}</div>`}
     </details>`;
   };
 
   vista.innerHTML = `
     <div class="lista-cabecera">${botonAnadir('cumple', 'Añadir cumpleaños')}</div>
-    <div class="section-title section-title-first">🎂 Próximos 30 días <span class="event-count">${prox.reduce((a, p) => a + p.nombres.length, 0)}</span></div>
-    ${prox.length ? prox.map(filaProx).join('') : '<div class="empty-state small"><div class="empty-text">Nadie cumple años en los próximos 30 días.</div></div>'}
-    <div class="section-title">📅 Todo el año <span class="event-count">${lista.length}</span></div>
+    <div class="section-title section-title-first">🎂 ${t('Próximos 30 días')} <span class="event-count">${prox.reduce((a, p) => a + p.nombres.length, 0)}</span></div>
+    ${prox.length ? prox.map(filaProx).join('') : `<div class="empty-state small"><div class="empty-text">${t('Nadie cumple años en los próximos 30 días.')}</div></div>`}
+    <div class="section-title">📅 ${t('Todo el año')} <span class="event-count">${lista.length}</span></div>
     ${Array.from({ length: 12 }, (_, i) => mesHtml(i + 1)).join('')}`;
 }

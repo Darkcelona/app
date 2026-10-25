@@ -4,6 +4,7 @@ import { getEvents, getBares, getUser, hasMe, isAdmin } from './store.js';
 import { historyState } from './api.js';
 import { esNuevo, recientes, marcarVisto, sinVer } from './novedades.js';
 import { vacioHTML } from './mascota.js';
+import { t, tp, localeNumeros } from './i18n.js';
 
 const $ = id => document.getElementById(id);
 
@@ -42,36 +43,36 @@ export function allTypes() {
 
 export function renderFilterChips() {
   const present = new Set(getEvents().map(e => e.tipo));
-  const types = allTypes().filter(t => present.has(t));
+  const types = allTypes().filter(ty => present.has(ty));
   if (filters.type !== 'all' && filters.type !== 'mine' && filters.type !== 'flag' && !types.includes(filters.type)) filters.type = 'all';
   const chip = (value, label) =>
     `<button class="filter-chip${filters.type === value ? ' active' : ''}" data-filter="${escHtml(value)}">${label}</button>`;
-  $('filters').innerHTML = chip('all', 'Todos') + types.map(t => chip(t, escHtml(t))).join('') + chip('mine', '⚡ Mis planes') + (getEvents().some(e => e.interes && !hasMe(e.asistentes) && isUpcoming(e)) ? chip('flag', '🚩 Me interesan') : '');
+  $('filters').innerHTML = chip('all', t('Todos')) + types.map(ty => chip(ty, escHtml(t(ty)))).join('') + chip('mine', t('⚡ Mis planes')) + (getEvents().some(e => e.interes && !hasMe(e.asistentes) && isUpcoming(e)) ? chip('flag', t('🚩 Me interesan')) : '');
 }
 
 export function fillTypeSelect(current) {
   const types = allTypes();
   if (current && !types.includes(current)) types.push(current);
-  $('f-tipo').innerHTML = types.map(t => `<option value="${escHtml(t)}">${escHtml(t)}</option>`).join('');
+  $('f-tipo').innerHTML = types.map(ty => `<option value="${escHtml(ty)}">${escHtml(t(ty))}</option>`).join('');
 }
 
 // ── Tarjeta de evento ───────────────────────────────────
 const ESTADOS_VENTA = { agotado: 'AGOTADO', cancelado: 'CANCELADO', aplazado: 'APLAZADO' };
-const eur = n => `${Number(n).toLocaleString('es-ES', { minimumFractionDigits: Number.isInteger(Number(n)) ? 0 : 2, maximumFractionDigits: 2 })} €`;
+const eur = n => `${Number(n).toLocaleString(localeNumeros(), { minimumFractionDigits: Number.isInteger(Number(n)) ? 0 : 2, maximumFractionDigits: 2 })} €`;
 /** " · desde 30 €" (o "30–45 €") si se conoce el precio. */
 function precioTexto(ev) {
   const a = ev.precioMin, b = ev.precioMax;
   if (a == null || !(Number(a) > 0)) return '';
-  return b != null && Number(b) > Number(a) ? ` · ${eur(a)}–${eur(b)}` : ` · desde ${eur(a)}`;
+  return b != null && Number(b) > Number(a) ? ` · ${eur(a)}–${eur(b)}` : ' · ' + t('desde {precio}', { precio: eur(a) });
 }
 
 /** Línea de lugar: si hay sitio, es un enlace a Google Maps (en el móvil abre la app de mapas). */
 function lugar(icono, texto, extra = '') {
-  const t = String(texto || '').trim();
-  if (!t) return '';
-  const maps = mapsUrl(t);
-  const cuerpo = `${icono} ${escHtml(t)}`;
-  return `<div class="event-venue ${extra}">${maps ? `<a class="venue-link" href="${escHtml(maps)}" target="_blank" rel="noopener noreferrer" title="Ver en Google Maps">${cuerpo}</a>` : cuerpo}</div>`;
+  const sitio = String(texto || '').trim();
+  if (!sitio) return '';
+  const maps = mapsUrl(sitio);
+  const cuerpo = `${icono} ${escHtml(sitio)}`;
+  return `<div class="event-venue ${extra}">${maps ? `<a class="venue-link" href="${escHtml(maps)}" target="_blank" rel="noopener noreferrer" title="${t('Ver en Google Maps')}">${cuerpo}</a>` : cuerpo}</div>`;
 }
 
 /** "20 oct" a partir de AAAA-MM-DD. */
@@ -84,7 +85,7 @@ function fechaCorta(iso) {
 function pasos(ev, id) {
   const n = acompanantes(ev.asistentes, getUser());
   if (n === null) return '';
-  return `<span class="plus-step" title="Personas que vienen contigo"><button data-action="plus-menos" data-id="${id}" aria-label="Un acompañante menos"${n ? '' : ' disabled'}>−</button><span class="plus-n">${n ? '+' + n : '+0'}</span><button data-action="plus-mas" data-id="${id}" aria-label="Un acompañante más"${hayHueco(ev, 1) ? '' : ' disabled'}>＋</button></span>`;
+  return `<span class="plus-step" title="${t('Personas que vienen contigo')}"><button data-action="plus-menos" data-id="${id}" aria-label="${t('Un acompañante menos')}"${n ? '' : ' disabled'}>−</button><span class="plus-n">${n ? '+' + n : '+0'}</span><button data-action="plus-mas" data-id="${id}" aria-label="${t('Un acompañante más')}"${hayHueco(ev, 1) ? '' : ' disabled'}>＋</button></span>`;
 }
 
 export function eventCard(ev, d, todayStr) {
@@ -116,7 +117,7 @@ export function eventCard(ev, d, todayStr) {
     ? `<div class="event-media-btns">${
         yt ? `<a class="btn-yt" href="${escHtml(yt)}" target="_blank" rel="noopener noreferrer">▶ YouTube</a>` : ''
       }${
-        tk ? `<a class="btn-ticket" href="${escHtml(tk)}" target="_blank" rel="noopener noreferrer">🎟️ Entradas${precioTexto(ev)}</a>` : ''
+        tk ? `<a class="btn-ticket" href="${escHtml(tk)}" target="_blank" rel="noopener noreferrer">🎟️ ${t('Entradas')}${precioTexto(ev)}</a>` : ''
       }</div>`
     : '';
 
@@ -124,21 +125,21 @@ export function eventCard(ev, d, todayStr) {
     `<span class="attendee-chip${myNames.includes(normalizeName(a)) ? ' omar' : ''}">${escHtml(a)}</span>`
   ).join('');
 
-  const estadoVenta = ESTADOS_VENTA[ev.estadoVenta] ? `<span class="venta-badge venta-${escHtml(ev.estadoVenta)}">${ESTADOS_VENTA[ev.estadoVenta]}</span>` : '';
-  const aforo = (ev.limite ? `<span class="limite-badge">👥 Límite ${ev.limite} · ${personas} apuntado${personas === 1 ? '' : 's'}</span>` : '')
-    + (ev.fechaLimite ? (sinPlazo ? '<span class="venta-badge venta-agotado">PLAZO CERRADO</span>' : `<span class="limite-badge">⏳ Apuntarse hasta el ${fechaCorta(ev.fechaLimite)}</span>`) : '')
-    + (completo ? '<span class="venta-badge venta-agotado">COMPLETO</span>' : '');
-  const badges = aforo + (nuevo ? '<span class="new-badge">✨ NUEVO</span>' : '') + estadoVenta + (ev.fecha === todayStr || (ev.fechaFin && ev.fecha <= todayStr && ev.fechaFin >= todayStr)
-    ? '<span class="upcoming-badge">HOY</span>'
+  const estadoVenta = ESTADOS_VENTA[ev.estadoVenta] ? `<span class="venta-badge venta-${escHtml(ev.estadoVenta)}">${t(ESTADOS_VENTA[ev.estadoVenta])}</span>` : '';
+  const aforo = (ev.limite ? `<span class="limite-badge">👥 ${t('Límite {n}', { n: ev.limite })} · ${tp(personas, '{n} apuntado', '{n} apuntados')}</span>` : '')
+    + (ev.fechaLimite ? (sinPlazo ? `<span class="venta-badge venta-agotado">${t('PLAZO CERRADO')}</span>` : `<span class="limite-badge">⏳ ${t('Apuntarse hasta el {fecha}', { fecha: fechaCorta(ev.fechaLimite) })}</span>`) : '')
+    + (completo ? `<span class="venta-badge venta-agotado">${t('COMPLETO')}</span>` : '');
+  const badges = aforo + (nuevo ? `<span class="new-badge">✨ ${t('NUEVO')}</span>` : '') + estadoVenta + (ev.fecha === todayStr || (ev.fechaFin && ev.fecha <= todayStr && ev.fechaFin >= todayStr)
+    ? `<span class="upcoming-badge">${t('HOY')}</span>`
     : '');
 
   const joinBtn = !upcoming ? '' : mine
-    ? `<button class="btn-join joined" data-action="leave" data-id="${id}">✓ Voy · Quitarme</button>${pasos(ev, id)}<button class="btn-join btn-cal" data-action="calendar" data-id="${id}" title="Añadir a mi calendario" aria-label="Añadir a mi calendario">📅</button>`
+    ? `<button class="btn-join joined" data-action="leave" data-id="${id}">✓ ${t('Voy · Quitarme')}</button>${pasos(ev, id)}<button class="btn-join btn-cal" data-action="calendar" data-id="${id}" title="${t('Añadir a mi calendario')}" aria-label="${t('Añadir a mi calendario')}">📅</button>`
     : sinPlazo
-      ? '<button class="btn-join" disabled title="Se acabó el plazo para apuntarse">🔒 Plazo cerrado</button>'
+      ? `<button class="btn-join" disabled title="${t('Se acabó el plazo para apuntarse')}">🔒 ${t('Plazo cerrado')}</button>`
     : completo
-      ? '<button class="btn-join" disabled title="Ya no caben más">🔒 Completo</button>'
-      : `<button class="btn-join" data-action="join" data-id="${id}">＋ Apuntarme</button>`;
+      ? `<button class="btn-join" disabled title="${t('Ya no caben más')}">🔒 ${t('Completo')}</button>`
+      : `<button class="btn-join" data-action="join" data-id="${id}">＋ ${t('Apuntarme')}</button>`;
 
   return `
   <article class="event-card${mine ? ' omar-event' : ''}${nuevo ? ' is-new' : ''}" data-id="${id}">
@@ -147,25 +148,25 @@ export function eventCard(ev, d, todayStr) {
       <div class="event-content-col">
         <div class="event-card-header">
           <div class="event-main">
-            <div><span class="event-type-badge ${typeClass(ev.tipo)}">${escHtml(ev.tipo || 'Otros')}</span>${badges}</div>
+            <div><span class="event-type-badge ${typeClass(ev.tipo)}">${escHtml(t(ev.tipo || 'Otros'))}</span>${badges}</div>
             <div class="event-title">${escHtml(ev.evento)}</div>
             ${lugar('📍', ev.sitio)}
-            ${ev.previa ? `<div class="event-venue event-previa">🍺 Previa: ${escHtml(ev.previa)}</div>` : ''}
+            ${ev.previa ? `<div class="event-venue event-previa">🍺 ${t('Previa')}: ${escHtml(ev.previa)}</div>` : ''}
           </div>
           <div class="event-actions">
-            ${upcoming && !mine ? `<button class="btn-sm btn-flag${ev.interes ? ' on' : ''}" data-action="flag" data-id="${id}" title="${ev.interes ? 'Quitar la bandera' : 'Me interesa (no sé si ir)'}" aria-label="Bandera: me interesa" aria-pressed="${ev.interes ? 'true' : 'false'}">${ev.interes ? '🚩' : '⚑'}</button>` : ''}
-            <button class="btn-sm" data-action="edit" data-id="${id}" aria-label="Editar evento">✏️</button>
-            ${isAdmin() || ev.mio ? `<button class="btn-sm del" data-action="delete" data-id="${id}" aria-label="Eliminar evento">🗑️</button>` : ''}
+            ${upcoming && !mine ? `<button class="btn-sm btn-flag${ev.interes ? ' on' : ''}" data-action="flag" data-id="${id}" title="${ev.interes ? t('Quitar la bandera') : t('Me interesa (no sé si ir)')}" aria-label="${t('Bandera: me interesa')}" aria-pressed="${ev.interes ? 'true' : 'false'}">${ev.interes ? '🚩' : '⚑'}</button>` : ''}
+            <button class="btn-sm" data-action="edit" data-id="${id}" aria-label="${t('Editar evento')}">✏️</button>
+            ${isAdmin() || ev.mio ? `<button class="btn-sm del" data-action="delete" data-id="${id}" aria-label="${t('Eliminar evento')}">🗑️</button>` : ''}
           </div>
         </div>
         ${mediaBtns}
         <div class="event-body event-body-hidden">
-          ${ev.propone ? `<div class="event-proposer">👤 Propone: <strong>${escHtml(ev.propone)}</strong></div>` : ''}
+          ${ev.propone ? `<div class="event-proposer">👤 ${t('Propone')}: <strong>${escHtml(ev.propone)}</strong></div>` : ''}
           <div class="attendees-list">${chips}</div>
         </div>
         <div class="event-foot">
           ${joinBtn}
-          <button class="event-card-toggle" data-action="toggle" data-count="${personas}" aria-expanded="false">Ver asistentes (${personas}) ▾</button>
+          <button class="event-card-toggle" data-action="toggle" data-count="${personas}" aria-expanded="false">${t('Ver asistentes ({n}) ▾', { n: personas })}</button>
         </div>
       </div>
     </div>
@@ -194,8 +195,8 @@ export function renderEvents() {
 
   const r = resumenPlanes(events, todayStr);
   $('stats-row').innerHTML = `
-    <div class="stat-card"><div class="stat-num">${r.proximos}</div><div class="stat-label">Próximos planes</div></div>
-    <div class="stat-card"><div class="stat-num gold">${r.voy}</div><div class="stat-label">Voy a 🤘</div></div>`;
+    <div class="stat-card"><div class="stat-num">${r.proximos}</div><div class="stat-label">${t('Próximos planes')}</div></div>
+    <div class="stat-card"><div class="stat-num gold">${r.voy}</div><div class="stat-label">${t('Voy a')} 🤘</div></div>`;
 
   const list = $('events-list');
   let html = '';
@@ -211,21 +212,21 @@ export function renderEvents() {
     html += eventCard(ev, d, todayStr);
   }
   list.innerHTML = html || (events.length
-    ? vacioHTML('triste', 'No hay eventos que coincidan', { una: true })
-    : vacioHTML('baile', 'Todavía no hay planes. ¡Añade el primero con el botón +!'));
+    ? vacioHTML('triste', t('No hay eventos que coincidan'), { una: true })
+    : vacioHTML('baile', t('Todavía no hay planes. ¡Añade el primero con el botón +!')));
 }
 
 // ── Novedades ───────────────────────────────────────────
 export function renderNovedades() {
   const todayStr = today();
   const lista = recientes(getEvents(), todayStr);
-  let html = `<div class="section-title section-title-first">✨ Novedades <span class="event-count">${lista.length}</span></div>
-    <p class="novedades-hint">Planes que ha añadido gente del grupo en las últimas dos semanas. Los de después de tu última visita van resaltados.</p>`;
+  let html = `<div class="section-title section-title-first">✨ ${t('Novedades')} <span class="event-count">${lista.length}</span></div>
+    <p class="novedades-hint">${t('Planes que ha añadido gente del grupo en las últimas dos semanas. Los de después de tu última visita van resaltados.')}</p>`;
   for (const ev of lista) {
     const d = parseDate(ev.fecha);
     if (d) html += eventCard(ev, d, todayStr);
   }
-  if (!lista.length) html += vacioHTML('saludo', 'Nada nuevo por ahora. Cuando alguien añada un plan, aparecerá aquí.', { una: true });
+  if (!lista.length) html += vacioHTML('saludo', t('Nada nuevo por ahora. Cuando alguien añada un plan, aparecerá aquí.'), { una: true });
   $('novedades-view').innerHTML = html;
   marcarVisto();
 }
@@ -238,7 +239,7 @@ export function renderNovedadesAviso() {
   badge.hidden = !n;
   const banner = $('novedades-banner');
   banner.hidden = !n;
-  if (n) banner.querySelector('.novedades-banner-text').textContent = n === 1 ? '✨ Hay 1 plan nuevo desde tu última visita' : `✨ Hay ${n} planes nuevos desde tu última visita`;
+  if (n) banner.querySelector('.novedades-banner-text').textContent = '✨ ' + tp(n, 'Hay {n} plan nuevo desde tu última visita', 'Hay {n} planes nuevos desde tu última visita');
   try { if (navigator.setAppBadge) (n ? navigator.setAppBadge(n) : navigator.clearAppBadge()).catch(() => {}); } catch { /* noop */ }
 }
 
@@ -246,7 +247,7 @@ export function toggleAttendees(btn) {
   const body = btn.closest('.event-content-col').querySelector('.event-body');
   const hidden = body.classList.toggle('event-body-hidden');
   btn.setAttribute('aria-expanded', String(!hidden));
-  btn.textContent = hidden ? `Ver asistentes (${btn.dataset.count}) ▾` : 'Ocultar ▴';
+  btn.textContent = hidden ? t('Ver asistentes ({n}) ▾', { n: btn.dataset.count }) : t('Ocultar ▴');
 }
 
 // ── Bares ───────────────────────────────────────────────
@@ -261,7 +262,7 @@ import { botonesLista, botonAnadir } from './listas.js';
 export function renderBares() {
   const bares = getBares();
   $('bares-list').innerHTML =
-    `<div class="lista-cabecera">${botonAnadir('bar', 'Añadir bar')}</div><div class="section-title section-title-first">🍺 Bares & Salas <span class="event-count">${bares.length}</span></div>` +
+    `<div class="lista-cabecera">${botonAnadir('bar', 'Añadir bar')}</div><div class="section-title section-title-first">🍺 ${t('Bares y salas')} <span class="event-count">${bares.length}</span></div>` +
     (bares.length ? bares.map(b => {
       const link = safeUrl(b.link);
       return `
@@ -272,10 +273,10 @@ export function renderBares() {
           <div class="bar-type">${escHtml(b.tipo)}</div>
           <div class="bar-hours">${escHtml(b.horario)}</div>
           <div class="bar-addr">📍 ${escHtml(b.direccion)}</div>
-          ${link ? `<a class="bar-link" href="${escHtml(link)}" target="_blank" rel="noopener noreferrer">📍 Ver en Maps →</a>` : ''}
+          ${link ? `<a class="bar-link" href="${escHtml(link)}" target="_blank" rel="noopener noreferrer">📍 ${t('Ver en Maps →')}</a>` : ''}
         </div>
       </div>`;
-    }).join('') : '<div class="empty-state"><div class="empty-icon">🍺</div><div class="empty-text">Sin bares todavía</div></div>');
+    }).join('') : `<div class="empty-state"><div class="empty-icon">🍺</div><div class="empty-text">${t('Sin bares todavía')}</div></div>`);
 }
 
 // ── Historial ───────────────────────────────────────────
@@ -293,7 +294,7 @@ export function renderHistorial() {
       <div class="event-card-header">
         <div class="event-date-block">${dateBlock}</div>
         <div class="event-main">
-          <div><span class="event-type-badge ${typeClass(ev.tipo)}">${escHtml(ev.tipo)}</span>${mine ? '<span class="upcoming-badge">✓ Fuiste</span>' : ''}</div>
+          <div><span class="event-type-badge ${typeClass(ev.tipo)}">${escHtml(t(ev.tipo))}</span>${mine ? `<span class="upcoming-badge">✓ ${t('Fuiste')}</span>` : ''}</div>
           <div class="event-title small">${escHtml(ev.evento)}</div>
           <div class="event-venue small">${att.slice(0, 4).map(escHtml).join(', ')}${att.length > 4 ? '...' : ''}</div>
         </div>
@@ -302,11 +303,11 @@ export function renderHistorial() {
   }).join('');
 
   const restantes = total - items.length;
-  const vacio = loading ? 'Cargando historial…' : error ? 'No se pudo cargar el historial. Inténtalo de nuevo.' : q ? 'Sin resultados' : 'Todavía no hay historial';
+  const vacio = loading ? t('Cargando historial…') : error ? t('No se pudo cargar el historial. Inténtalo de nuevo.') : q ? t('Sin resultados') : t('Todavía no hay historial');
   $('historial-list').innerHTML =
-    `<div class="section-title">📜 Historial <span class="event-count">${total}</span></div>` +
+    `<div class="section-title">📜 ${t('Historial')} <span class="event-count">${total}</span></div>` +
     (items.length ? cards : `<div class="empty-state"><div class="empty-icon">📜</div><div class="empty-text">${vacio}</div></div>`) +
     (restantes > 0
-      ? `<button class="btn-secondary btn-more" data-action="history-more"${loading ? ' disabled' : ''}>${loading ? 'Cargando…' : `Mostrar ${Math.min(HISTORY_PAGE, restantes)} más (${restantes} restantes)`}</button>`
+      ? `<button class="btn-secondary btn-more" data-action="history-more"${loading ? ' disabled' : ''}>${loading ? t('Cargando…') : t('Mostrar {n} más ({r} restantes)', { n: Math.min(HISTORY_PAGE, restantes), r: restantes })}</button>`
       : '');
 }

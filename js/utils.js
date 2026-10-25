@@ -1,4 +1,5 @@
 import { MONTHS_FULL } from './config.js';
+import { t, tp, mesesCortos } from './i18n.js';
 
 // ── Escapado / URLs seguras ─────────────────────────────
 
@@ -108,12 +109,12 @@ export function formatRelativeTime(isoStr) {
   const t = new Date(isoStr).getTime();
   if (Number.isNaN(t)) return '';
   const mins = Math.floor((Date.now() - t) / 60000);
-  if (mins < 1) return 'hace un momento';
-  if (mins < 60) return `hace ${mins} min`;
+  if (mins < 1) return t('hace un momento');
+  if (mins < 60) return t('hace {n} min', { n: mins });
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `hace ${hrs}h`;
+  if (hrs < 24) return t('hace {n} h', { n: hrs });
   const days = Math.floor(hrs / 24);
-  return `hace ${days} día${days > 1 ? 's' : ''}`;
+  return tp(days, 'hace {n} día', 'hace {n} días');
 }
 
 // ── Fechas escritas a mano en el Excel ──────────────────
@@ -159,7 +160,7 @@ export function formatDateRangeText(fecha, fechaFin) {
 export function formatShortRange(fecha, fechaFin) {
   const a = parseDate(fecha), b = parseDate(fechaFin);
   if (!a || !b) return '';
-  const M = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  const M = mesesCortos();
   return a.getMonth() === b.getMonth()
     ? `${a.getDate()}–${b.getDate()} ${M[a.getMonth()]}`
     : `${a.getDate()} ${M[a.getMonth()]} – ${b.getDate()} ${M[b.getMonth()]}`;
@@ -245,10 +246,10 @@ const ymd = s => String(s).replace(/-/g, '');
 /** Texto de la descripción: previa, entradas y propone. */
 function detallesCalendario(ev, appUrl) {
   const l = [];
-  if (ev.previa) l.push('🍺 Previa: ' + ev.previa);
+  if (ev.previa) l.push('🍺 ' + t('Previa') + ': ' + ev.previa);
   const tk = safeUrl(ev.tickets) || entradasDeTexto(ev.evento);
-  if (tk) l.push('🎟️ Entradas: ' + tk);
-  if (ev.propone) l.push('Propone: ' + ev.propone);
+  if (tk) l.push('🎟️ ' + t('Entradas') + ': ' + tk);
+  if (ev.propone) l.push(t('Propone') + ': ' + ev.propone);
   if (appUrl) l.push('Darkcelona Agenda: ' + appUrl);
   return l.join('\n');
 }

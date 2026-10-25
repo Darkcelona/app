@@ -1,6 +1,7 @@
 // Otros grupos de la comunidad (deportivos...): lista [{ n: 'Padel 🏓', u: 'https://t.me/+…' }] de la pestaña "Grupos" del Excel.
 import { escHtml } from './utils.js';
 import { getGrupos } from './store.js';
+import { t } from './i18n.js';
 
 const $ = id => document.getElementById(id);
 
@@ -26,13 +27,13 @@ const enlaceSeguro = u => (/^https?:\/\//i.test(String(u || '')) ? String(u) : '
 export function renderGrupos() {
   const lista = getGrupos().filter(g => g && g.n && enlaceSeguro(g.u));
   $('grupos-view').innerHTML = `
-    <div class="section-title section-title-first">🏆 Otros grupos <span class="event-count">${lista.length}</span></div>
-    <p class="grupos-intro">Grupos de la comunidad Darkcelona para la práctica de otras aficiones. Abiertos a todos los miembros.</p>
+    <div class="section-title section-title-first">🏆 ${t('Otros grupos')} <span class="event-count">${lista.length}</span></div>
+    <p class="grupos-intro">${t('Grupos de la comunidad Darkcelona para la práctica de otras aficiones. Abiertos a todos los miembros.')}</p>
     ${lista.length ? lista.map(g => `
       <a class="grupo-card" href="${escHtml(enlaceSeguro(g.u))}" target="_blank" rel="noopener noreferrer">
         <span class="grupo-icono" aria-hidden="true">${iconoGrupo(g.n)}</span>
         <span class="grupo-nombre">${escHtml(limpiarNombre(g.n))}</span>
-        <span class="grupo-unirme">Unirme ›</span>
-      </a>`).join('') : '<div class="empty-state small"><div class="empty-text">Todavía no hay otros grupos.</div></div>'}
-    <p class="grupos-nota">¿Quieres añadir un grupo? Habla antes con los admins.</p>`;
+        <span class="grupo-unirme">${t('Unirme ›')}</span>
+      </a>`).join('') : `<div class="empty-state small"><div class="empty-text">${t('Todavía no hay otros grupos.')}</div></div>`}
+    <p class="grupos-nota">${t('¿Quieres añadir un grupo? Habla antes con los admins.')}</p>`;
 }

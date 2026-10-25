@@ -1,3 +1,4 @@
+import { mesesCortos, mesesLargos, diasSemana } from './i18n.js';
 // URL de la API (Edge Function de Supabase) que hace de backend.
 // La pone el administrador al desplegar; los usuarios nunca la ven ni la configuran.
 export const API_URL = 'https://oqhnqebthwqerpkiszre.supabase.co/functions/v1/api';
@@ -27,9 +28,10 @@ export const SYNC_TIMEOUT_MS = 60000;
 export const SYNC_MIN_INTERVAL_MS = 60000;        // como mucho una lectura por minuto al volver a la app
 export const HISTORY_PAGE = 30;                   // el historial llega por páginas; nunca se descarga entero
 
-export const MONTHS_ES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
-export const MONTHS_FULL = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-export const DAYS_ES = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+// Nombres de meses y días en el idioma elegido (los nombres de las constantes son históricos: ya no son solo español).
+export const MONTHS_ES = mesesCortos();
+export const MONTHS_FULL = mesesLargos();
+export const DAYS_ES = diasSemana();
 
 // Tipos del desplegable del Excel (validación de datos de la columna Tipo). Los que aparezcan en los datos se añaden solos.
 export const DEFAULT_TYPES = ['Concierto', 'Tributo', 'Festival', 'Cerveceo', 'Eventos Darkcelona', 'Otros'];

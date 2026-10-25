@@ -4,6 +4,7 @@ import { KEYS } from './config.js';
 import { calendarioGoogleUrl, calendarioIcs, hashId, eventKey } from './utils.js';
 import { getEvents, lsGet, lsSet, lsRemove } from './store.js';
 import { $, showToast } from './ui.js';
+import { t } from './i18n.js';
 
 const appUrl = () => location.origin + location.pathname;
 let pendiente = null;   // el plan del que se está preguntando
@@ -46,7 +47,7 @@ export function abrirCalendario(id) {
   const ev = getEvents().find(e => e.id === id);
   if (!ev) return;
   const pref = preferencia();
-  if (pref === 'google' || pref === 'ics') { hacer(ev, pref); if (pref === 'ics') showToast('📅 Abre el archivo para añadirlo'); }
+  if (pref === 'google' || pref === 'ics') { hacer(ev, pref); if (pref === 'ics') showToast(t('📅 Abre el archivo para añadirlo')); }
   else preguntar(ev);
 }
 
@@ -57,7 +58,7 @@ export function elegirCalendario(via) {
   cerrarCalendario();
   if (via === 'no') return;
   hacer(ev, via);
-  if (via === 'ics') showToast('📅 Abre el archivo para añadirlo');
+  if (via === 'ics') showToast(t('📅 Abre el archivo para añadirlo'));
 }
 
 /** Para el Perfil: qué está elegido ('google' | 'ics' | '') y cómo olvidarlo. */
@@ -67,5 +68,5 @@ export function preferenciaCalendario() {
 }
 export function resetearCalendario() {
   lsRemove(KEYS.calendario);
-  showToast('📅 Listo: la próxima vez te preguntaré');
+  showToast(t('📅 Listo: la próxima vez te preguntaré'));
 }

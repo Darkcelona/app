@@ -18,6 +18,7 @@ import {
 } from './api.js';
 import { $, showToast } from './ui.js';
 import { celebrar, mascotaHTML } from './mascota.js';
+import { t, tp, traducirDom, iniciarSelectores } from './i18n.js';
 
 console.info(`Darkcelona ${APP_VERSION}`);
 
@@ -129,17 +130,17 @@ function updateSyncBar(state, msg) {
     bar.className = 'sync-bar syncing';
     icon.innerHTML = '<span class="spin">🔄</span>';
     text.className = 'sync-text syncing';
-    text.textContent = getEvents().length ? 'Sincronizando…' : 'Conectando con el servidor… la primera vez puede tardar hasta un minuto';
+    text.textContent = getEvents().length ? t('Sincronizando…') : t('Conectando con el servidor… la primera vez puede tardar hasta un minuto');
   } else if (state === 'err') {
     bar.className = 'sync-bar err';
     icon.textContent = '⚠️';
     text.className = 'sync-text err';
-    text.textContent = (msg || 'Sin conexión') + (pending ? ` · ${pending} cambio${pending > 1 ? 's' : ''} por enviar` : '');
+    text.textContent = (msg || t('Sin conexión')) + (pending ? ' · ' + tp(pending, '{n} cambio por enviar', '{n} cambios por enviar') : '');
   } else {
     bar.className = 'sync-bar syncing';
     icon.textContent = '⏳';
     text.className = 'sync-text syncing';
-    text.textContent = `${pending} cambio${pending > 1 ? 's' : ''} por enviar…`;
+    text.textContent = tp(pending, '{n} cambio por enviar…', '{n} cambios por enviar…');
   }
 }
 
@@ -154,7 +155,7 @@ let lastSyncAt = 0;
 let flushTimer;
 
 function handleAuthLost() {
-  logout('Tu acceso ya no es válido. Pide un enlace nuevo a un admin del grupo.');
+  logout(t('Tu acceso ya no es válido. Pide un enlace nuevo a un admin del grupo.'));
 }
 
 async function runSync(manual) {
@@ -166,14 +167,14 @@ async function runSync(manual) {
     applyUserUI();
     renderAll();
     updateSyncBar('ok');
-    res.rejected.forEach(r => showToast('❌ ' + (REJECT_MSG[r.error] || r.error), 'error'));
-    if (manual) showToast('✓ Sincronizado');
+    res.rejected.forEach(r => showToast('❌ ' + (REJECT_MSG[r.error] ? t(REJECT_MSG[r.error]) : r.error), 'error'));
+    if (manual) showToast(t('✓ Sincronizado'));
     if (currentTab === 'admin') loadAdmin();
   } catch (err) {
     if (err instanceof AuthError) return handleAuthLost();
     const offline = err instanceof TypeError || !navigator.onLine;
-    updateSyncBar('err', offline ? 'Sin conexión: se enviará al volver la red' : err.message.slice(0, 80));
-    if (manual) showToast('❌ No se pudo sincronizar', 'error');
+    updateSyncBar('err', offline ? t('Sin conexión: se enviará al volver la red') : err.message.slice(0, 80));
+    if (manual) showToast(t('❌ No se pudo sincronizar'), 'error');
   }
 }
 
@@ -190,13 +191,13 @@ function toggleGoing(id, joining) {
   const events = getEvents();
   const ev = events.find(e => e.id === id);
   if (!ev || !user) return;
-  if (joining && !hayHueco(ev, 1)) { showToast(plazoVencido(ev) ? '⏳ Ya se acabó el plazo para apuntarse a ese plan' : '😕 Ese plan está completo: ya no caben más', 'error'); return; }
+  if (joining && !hayHueco(ev, 1)) { showToast(plazoVencido(ev) ? t(REJECT_MSG.deadline) : t(REJECT_MSG.full), 'error'); return; }
   setEvents(events.map(e => (e.id === id
     ? { ...e, asistentes: joining ? addAttendee(e.asistentes, user) : removeAttendee(e.asistentes, user) }
     : e)));
   (joining ? queueJoin : queueLeave)(ev);
   renderAll();
-  showToast(joining ? '🤘 ¡Apuntado!' : 'Te has quitado del plan');
+  showToast(joining ? t('🤘 ¡Apuntado!') : t('Te has quitado del plan'));
   scheduleFlush();
   if (joining) celebrar();
 }
@@ -209,7 +210,7 @@ function toggleInteres(id) {
   setEvents(getEvents().map(e => (e.id === id ? { ...e, interes: on } : e)));
   queueFlag(ev, on);
   renderAll();
-  showToast(on ? '🚩 Marcado: lo tienes en tu Perfil' : 'Bandera quitada');
+  showToast(on ? t('🚩 Marcado: lo tienes en tu Perfil') : t('Bandera quitada'));
   scheduleFlush();
 }
 
@@ -222,7 +223,7 @@ function cambiarAcompanantes(id, delta) {
   if (actual === null) return;
   const n = Math.max(0, Math.min(20, actual + delta));
   if (n === actual) return;
-  if (delta > 0 && !hayHueco(ev, 1)) { showToast(plazoVencido(ev) ? '⏳ Ya se acabó el plazo para apuntarse a ese plan' : '😕 Ese plan está completo: ya no caben más', 'error'); return; }
+  if (delta > 0 && !hayHueco(ev, 1)) { showToast(plazoVencido(ev) ? t(REJECT_MSG.deadline) : t(REJECT_MSG.full), 'error'); return; }
   const texto = setAcompanantes(ev.asistentes, user, n);
   if (texto === null) return;
   setEvents(getEvents().map(e => (e.id === id ? { ...e, asistentes: texto } : e)));
@@ -253,7 +254,7 @@ function openModal(id) {
   editingId = id || null;
   const user = getUser();
   const ev = id ? getEvents().find(e => e.id === id) : null;
-  $('modal-title-text').textContent = ev ? '✏️ Editar Evento' : '🎸 Nueva Quedada';
+  $('modal-title-text').textContent = ev ? t('✏️ Editar Evento') : t('🎸 Nueva Quedada');
   $('f-fecha').value = ev?.fecha || today();
   $('f-fecha-fin').value = ev?.fechaFin || '';
   fillTypeSelect(ev?.tipo);
@@ -289,17 +290,17 @@ function readUrlField(id, label) {
   const raw = $(id).value.trim();
   if (!raw) return '';
   const url = safeUrl(raw);
-  if (!url) throw new Error(`${label}: el enlace debe empezar por http:// o https://`);
+  if (!url) throw new Error(t('{campo}: el enlace debe empezar por http:// o https://', { campo: t(label) }));
   return url;
 }
 
 function saveEvent() {
   const fecha = $('f-fecha').value;
   const evento = $('f-evento').value.trim();
-  if (!parseDate(fecha) || !evento) { showToast('Fecha y evento son obligatorios', 'error'); return; }
+  if (!parseDate(fecha) || !evento) { showToast(t('Fecha y evento son obligatorios'), 'error'); return; }
   const fechaFin = $('f-fecha-fin').value;
   if (fechaFin && (!parseDate(fechaFin) || fechaFin <= fecha)) {
-    showToast('La fecha fin debe ser posterior a la de inicio', 'error');
+    showToast(t('La fecha fin debe ser posterior a la de inicio'), 'error');
     return;
   }
   let data;
@@ -318,9 +319,9 @@ function saveEvent() {
       cerrado: $('f-cerrado').checked,
       fechaLimite: $('f-plazo-on').checked ? $('f-plazo').value : '',
     };
-    if ($('f-plazo-on').checked && !parseDate(data.fechaLimite)) throw new Error('Pon la fecha límite para apuntarse, o desmarca la casilla');
-    if (data.fechaLimite && data.fechaLimite > (data.fechaFin || data.fecha)) throw new Error('La fecha límite no puede ser posterior al plan');
-    if ($('f-limite-on').checked && !data.limite) throw new Error('Pon cuántas personas caben, o desmarca el límite');
+    if ($('f-plazo-on').checked && !parseDate(data.fechaLimite)) throw new Error(t('Pon la fecha límite para apuntarse, o desmarca la casilla'));
+    if (data.fechaLimite && data.fechaLimite > (data.fechaFin || data.fecha)) throw new Error(t('La fecha límite no puede ser posterior al plan'));
+    if ($('f-limite-on').checked && !data.limite) throw new Error(t('Pon cuántas personas caben, o desmarca el límite'));
   } catch (e) {
     showToast(e.message, 'error');
     return;
@@ -334,7 +335,7 @@ function saveEvent() {
   if (previous) events[idx] = saved; else events.push(saved);
   setEvents(events);
   queueUpsert(saved, previous);
-  showToast(previous ? '✅ Evento actualizado' : '🤘 Evento añadido');
+  showToast(previous ? t('✅ Evento actualizado') : t('🤘 Evento añadido'));
   closeModal();
   renderAll();
   scheduleFlush();
@@ -343,11 +344,11 @@ function saveEvent() {
 function deleteEvent(id) {
   const ev = getEvents().find(e => e.id === id);
   if (!ev || !(isAdmin() || ev.mio)) return;
-  if (!confirm('¿Eliminar este evento? Desaparecerá para todo el grupo (queda anotado en el registro y un admin puede deshacerlo).')) return;
+  if (!confirm(t('¿Eliminar este evento? Desaparecerá para todo el grupo (queda anotado en el registro y un admin puede deshacerlo).'))) return;
   queueDelete(ev);
   setEvents(getEvents().filter(e => e.id !== id));
   renderAll();
-  showToast('🗑️ Evento eliminado');
+  showToast(t('🗑️ Evento eliminado'));
   scheduleFlush();
 }
 
@@ -355,19 +356,19 @@ function deleteEvent(id) {
 async function enterWithCode(code) {
   if (!code) return;
   setCode(code);
-  if (!isConfigured()) { showAccess('La app todavía no está conectada al servidor. Avisa a un admin.'); return; }
-  $('access-msg').textContent = 'Comprobando…';
+  if (!isConfigured()) { showAccess(t('La app todavía no está conectada al servidor. Avisa a un admin.')); return; }
+  $('access-msg').textContent = t('Comprobando…');
   try {
     await syncNow();
   } catch (err) {
     clearSession();
-    showAccess(err instanceof AuthError ? 'Ese código no es válido o ya no está activo. Pide uno nuevo a un admin.' : 'No se pudo conectar. Revisa tu conexión e inténtalo de nuevo.');
+    showAccess(err instanceof AuthError ? t('Ese código no es válido o ya no está activo. Pide uno nuevo a un admin.') : t('No se pudo conectar. Revisa tu conexión e inténtalo de nuevo.'));
     return;
   }
   hideAccess();
   applyUserUI();
   renderAll();
-  showToast(`¡Hola, ${getUser().nombre}! 🤘`);
+  showToast(t('¡Hola, {nombre}! 🤘', { nombre: getUser().nombre }));
 }
 
 // ── PWA ─────────────────────────────────────────────────
@@ -383,7 +384,7 @@ async function installPWA() {
   if (!deferredPrompt) return;
   deferredPrompt.prompt();
   const { outcome } = await deferredPrompt.userChoice;
-  if (outcome === 'accepted') showToast('📲 App instalada');
+  if (outcome === 'accepted') showToast(t('📲 App instalada'));
   deferredPrompt = null;
   $('pwa-banner').hidden = true;
   lsSet('darkcelona-pwa-dismissed', '1');
@@ -453,7 +454,7 @@ const actions = {
   },
   'perfil-filtro': el => { profileState.filtro = profileState.filtro === el.dataset.f ? '' : el.dataset.f; renderProfile(true); },
   'profile-more': () => { profileState.pastLimit += 30; renderProfile(true); },
-  'logout': () => { if (confirm('¿Cerrar sesión en este dispositivo? Tendrás que volver a entrar con tu enlace personal.')) logout('Has cerrado sesión.'); },
+  'logout': () => { if (confirm(t('¿Cerrar sesión en este dispositivo? Tendrás que volver a entrar con tu enlace personal.'))) logout(t('Has cerrado sesión.')); },
   'install': installPWA,
   'pwa-dismiss': () => { $('pwa-banner').hidden = true; lsSet('darkcelona-pwa-dismissed', '1'); },
 };
@@ -538,19 +539,21 @@ async function devAutoConnect() {
 }
 
 async function start() {
+  traducirDom();
+  iniciarSelectores();
   registerSW();
   const fromLink = takeCodeFromLink();
   await devAutoConnect();
 
-  if (!isConfigured()) { renderAll(); showAccess('La app todavía no está conectada al servidor. Avisa a un admin.'); return; }
-  if (!getCode()) { renderAll(); showAccess('Para entrar necesitas tu enlace personal. Pídeselo a un admin del grupo.'); return; }
+  if (!isConfigured()) { renderAll(); showAccess(t('La app todavía no está conectada al servidor. Avisa a un admin.')); return; }
+  if (!getCode()) { renderAll(); showAccess(t('Para entrar necesitas tu enlace personal. Pídeselo a un admin del grupo.')); return; }
 
   hideAccess();
   applyUserUI();
   renderAll();                                   // primero lo que haya en el dispositivo
   if (fromLink && !getUser()) $('access-msg').textContent = '';
   await runSync(false);                          // y enseguida lo último del Excel
-  if (fromLink && getUser()) showToast(`¡Hola, ${getUser().nombre}! 🤘`);
+  if (fromLink && getUser()) showToast(t('¡Hola, {nombre}! 🤘', { nombre: getUser().nombre }));
 }
 
 start();

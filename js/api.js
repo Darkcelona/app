@@ -6,6 +6,7 @@
 import { KEYS, SYNC_TIMEOUT_MS, HISTORY_PAGE } from './config.js';
 import { lsGet, lsSet, lsRemove, getCode, getApiUrl, setUser, setEvents, setBares, setCumples, setGrupos, getHistoryP1, setHistoryP1, setMyHistory } from './store.js';
 import { assignIds, eventKey, addAttendee, removeAttendee, setAcompanantes } from './utils.js';
+import { t } from './i18n.js';
 
 export class AuthError extends Error {}
 
@@ -27,12 +28,12 @@ async function post(body) {
     });
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     let json;
-    try { json = await resp.json(); } catch { throw new Error('La respuesta del servidor no es válida'); }
+    try { json = await resp.json(); } catch { throw new Error(t('La respuesta del servidor no es válida')); }
     if (json.error === 'unauthorized') throw new AuthError('unauthorized');
-    if (!json.ok) throw new Error(json.error || 'Error del servidor');
+    if (!json.ok) throw new Error(json.error || t('Error del servidor'));
     return json;
   } catch (err) {
-    if (err.name === 'AbortError') throw new Error('Tiempo de espera agotado');
+    if (err.name === 'AbortError') throw new Error(t('Tiempo de espera agotado'));
     throw err;
   } finally {
     clearTimeout(timer);
