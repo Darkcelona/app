@@ -164,7 +164,7 @@ export function eventCard(ev, d, todayStr) {
         </div>
         ${mediaBtns}
         <div class="event-body event-body-hidden">
-          ${ev.propone ? `<div class="event-proposer">👤 ${t('Propone')}: <strong>${escHtml(ev.propone)}</strong></div>` : ''}
+          ${ev.propone ? `<div class="event-proposer"><img class="jaime-apunta" src="img/jaime/apunta.webp" alt="" aria-hidden="true" width="60" height="52"><span>${t('Propone')}: <strong>${escHtml(ev.propone)}</strong></span></div>` : ''}
           <div class="attendees-list">${chips}</div>
         </div>
         <div class="event-foot">

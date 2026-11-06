@@ -76,7 +76,7 @@ export function renderProfile(historyReady) {
 
   $('profile-view').innerHTML = `
     <div class="profile-head">
-      <div class="profile-avatar">🤘</div>
+      <div class="profile-avatar"><img src="img/jaime/avatar.webp" alt="Jaime Bone" width="256" height="256"></div>
       <div>
         <div class="profile-name">${escHtml(user.nombre)}${isAdmin() ? ` <span class="role-badge">${t('Admin')}</span>` : ''}</div>
         <div class="profile-alias">${user.aliases && user.aliases.length ? t('También apareces como:') + ' ' + escHtml(user.aliases.join(', ')) : t('Apareces en la agenda como') + ' "' + escHtml(user.nombre) + '"'}</div>

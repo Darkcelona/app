@@ -877,3 +877,9 @@
   .event-foot .foot-der { display: flex; align-items: stretch; margin-left: auto; border-left: 1px solid var(--border); }
   .foot-der .voy-tag { border-right: none; }
   .foot-der .plus-step { border-right: none; border-left: 1px solid var(--border); }
+
+  /* ── JAIME BONE, LA MASCOTA ── */
+  .profile-avatar { width: 84px; height: 84px; overflow: hidden; padding: 0; }
+  .profile-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .event-proposer { display: flex; align-items: center; gap: 8px; }
+  .jaime-apunta { height: 52px; width: auto; flex-shrink: 0; }
