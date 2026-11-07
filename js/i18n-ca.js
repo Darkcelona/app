@@ -41,7 +41,7 @@ export const CA = {
   "Cerrar sesión en este dispositivo": "Tanca la sessió en aquest dispositiu",
   "Cerveceo": "Birres",
   "Completo": "Complet",
-  "Completo: ya no caben más (lista cerrada, sold out…)": "Complet: ja no hi caben més (llista tancada, sold out…)",
+  "Completo: ya no caben más (lista cerrada, sold out…)": "Complet: ja no n'hi caben més (llista tancada, sold out…)",
   "Comprobando…": "Comprovant…",
   "Concierto": "Concert",
   "Conectando con el servidor… la primera vez puede tardar hasta un minuto": "Connectant amb el servidor… la primera vegada pot trigar fins a un minut",
