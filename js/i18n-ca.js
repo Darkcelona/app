@@ -68,7 +68,7 @@ export const CA = {
   "Eventos Darkcelona": "Esdeveniments Darkcelona",
   "Falta el nombre": "Falta el nom",
   "Fecha *": "Data *",
-  "Fecha fin (opcional)": "Data de fi (opcional)",
+  "Fecha fin (opcional)": "Data de finalització (opcional)",
   "Fecha límite para apuntarse": "Data límit per apuntar-se",
   "Fecha y evento son obligatorios": "La data i el pla són obligatoris",
   "Festival": "Festival",
